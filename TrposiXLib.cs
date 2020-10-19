@@ -6,7 +6,10 @@ using System.Threading.Tasks;
 
 namespace KZ_Ingenico_EPI
 {
-    public class Class1
+    class TrposiXLib
     {
+        #region Export 
+
+        #endregion
     }
 }
