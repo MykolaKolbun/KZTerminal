@@ -1,224 +1,153 @@
 ﻿using System;
-using System.Runtime.InteropServices;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
 
-namespace KZ_Ingenico_EPI
+namespace KZ_IgenicoApp
 {
-    public delegate int TRGUI_ScreenShowDelegate(ScreenParams pScreenParams);
-    public delegate int TRGUI_ScreenCloseDelegate();
-
-    [StructLayout(LayoutKind.Sequential, CharSet = CharSet.Auto)]
-    public struct ScreenParams
-    {
-        long len; // [in]
-        long screenID; // [in]
-        long maxInp; // [in]
-        long minInp; // [in]
-        ulong format; // [in]
-        string pTitle; // [in]
-        string [] pStr; // [in]
-        string pInitStr; // [in]
-        string pButton0; // [in]
-        string pButton1; // [in]
-        CurrencyParams CurParam; // [in]
-        long eventKey; // [out]
-        char[] pBuf; // [in]
-    }
-
-    public struct CurrencyParams
-    {
-        char [] CurAlpha; // [in] символьный код валюты.[3]
-        char nDecPoint; // [in] позиция десятичной точки при отображении валюты.
-    }
-
-    public struct Tag
-    {
-        string Key;
-        string Value;
-    }
-
-    public struct InputParams
-    {
-        /// <summary>
-        /// Идентификатор операции, lenght 3.
-        /// </summary>
-        string MessageID;
-
-        /// <summary>
-        /// Номер ККМ.
-        /// </summary>
-        int ECRnumber;
-
-        /// <summary>
-        /// Номер операции ККМ. Хранится в журнале POS-терминала для возможности поиска транзакции по данному ключу. Обязательное поле для финансовых операций и сверки, необязательное – для сервисной.
-        /// </summary>
-        int ECRReceiptNumber;
-
-        /// <summary>
-        /// Итоговая сумма транзакции. Десятичная точка не передается, а только подразумевается.
-        /// </summary>
-        int TransactionAmount;
-
-        /// <summary>
-        /// Байт 0, представлен первой парой шестнадцатиричных цифр, биты:
-        /// 0 – chained transactions(сцепленные/последовательные транзакции). Используется в операции VER
-        /// 1 – режим EMV Fallback
-        /// 2 – игнорировать приложение лояльности
-        /// 3 – последовательное чтение журнала
-        /// 4 – чек не требуется
-        /// 5 – режим SOF
-        /// 6 – операция инициирована POS auditor
-        /// 7 – должен быть установлен
-        /// Байт 1. Вторая пара шестнадцатиричных цифр, биты:
-        /// 0 – 1 – RFU
-        /// 2 – не запрашивать карту для Void(игнорировать Void Enter Card из профиля терминала)
-        /// 3 – 6 – RFU
-        /// 7 – должен быть установлен
-        /// Байт 2 зарезервирован.Третья пара шестнадцатиричных цифр должна быть установлена в «20»
-        /// </summary>
-        byte[] Flags;
-    }
-
-    public struct OutputParams
+    class Response
     {
         /// <summary>
         /// Идентификатор операции
         /// </summary>
-        string MessageID;
+        public string MessageID { get; set; }
 
         /// <summary>
         /// Признак одобренности транзакции. Если параметр равен “Y”, то транзакция одобрена. Если параметр равен “N”, то отклонена
         /// </summary>
-        string Approve;
+        public string Approve { get; set; }
 
         /// <summary>
         /// Номер ККМ (эхо значения в запросе)
         /// </summary>
-        string ECRNumber;
+        public string ECRNumber { get; set; }
 
         /// <summary>
         /// Номер операции ККМ (эхо значения в запросе)
         /// </summary>
-        string ECRReceiptNumber;
+        public string ECRReceiptNumber { get; set; }
 
         /// <summary>
         /// Код Ответа
         /// </summary>
-        string ResponseCode;
+        public string ResponseCode { get; set; }
 
         /// <summary>
         /// Сумма транзакции
         /// </summary>
-        string TransactionAmount;
+        public string TransactionAmount { get; set; }
 
         /// <summary>
         /// Номер карты (Primary Account Number)
         /// </summary>
-        string PAN;
+        public string PAN { get; set; }
 
         /// <summary>
         /// Срок действия карты в формате MMYY
         /// </summary>
-        string ExpDate;
+        public string ExpDate { get; set; }
 
         /// <summary>
         /// Номер чека транзакции. Назначается POS-терминалом для каждой транзакции. Последовательно увеличивающийся номер.
         /// </summary>
-        string InvoiceNumber;
+        public string InvoiceNumber { get; set; }
 
         /// <summary>
         /// Кода Авторизации (назначается хостом, для каждой одобреной транзакции).
         /// </summary>
-        string AuthorizationID;
+        public string AuthorizationID { get; set; }
 
         /// <summary>
         /// Дата проведения транзакции в формате DDMM
         /// </summary>
-        string Date;
+        public string Date { get; set; }
 
         /// <summary>
         /// Время проведения транзакции в формате hhmm
         /// </summary>
-        string Time;
+        public string Time { get; set; }
 
         /// <summary>
         /// Имя эмитента карты. Назначается в конфигурационных параметрах POS-терминала
         /// </summary>
-        string IssuerName;
+        public string IssuerName { get; set; }
 
         /// <summary>
         /// Идентификатор организации. Назначается в конфигурационных параметрах POS-терминала.
         /// </summary>
-        string MerchantNo;
+        public string MerchantNo { get; set; }
 
         /// <summary>
         /// Processing Code (Поле 3 в хостовом сообщении ISO)
         /// </summary>
-        string ProcessingCode;
+        public string ProcessingCode { get; set; }
 
         /// <summary>
         /// Используется для идентификации способа ввода карты: ручной ввод, прокатывание карты через считыватель или чипкарта (Поле 22 в ISO)
         /// </summary>
-        string POSEntryMode;
+        public string POSEntryMode { get; set; }
 
         /// <summary>
         /// Идентифицирует условия, при которых была проведена транзакция. Например, транзакция без участия карты или покупателя, транзакция с помощью ККМ и т.д. (Поле 25 в ISO)
         /// </summary>
-        string POSConditionCode;
+        public string POSConditionCode { get; set; }
+
 
         /// <summary>
         /// “P” – PIN-код проверялся,“S” – Необходима проверка подписи,“C” – проверялся pin-код и требуется проверка подписи,“ “ – параметр отсутствует, проверка не требуется,
         /// /// </summary>
-        string CardholderVerificationCharacter;
+        public string CardholderVerificationCharacter { get; set; }
 
         /// <summary>
         /// Retrieval Reference Number (назначается хостом, для каждой одобреной транзакции)
         /// </summary>
-        string RRN;
+        public string RRN { get; set; }
 
         /// <summary>
         /// Идентификатор приложения чиповой карты
         /// </summary>
-        string ApplicationID;
+        public string ApplicationID { get; set; }
 
         /// <summary>
         /// Transaction Certificate (для EMV-приложений)
         /// </summary>
-        string TC;
+        public string TC { get; set; }
 
         /// <summary>
         /// Terminal Verification Result (Тег 95 )
         /// </summary>
-        string TVR;
+        public string TVR { get; set; }
 
         /// <summary>
         /// Идентификатор терминала (Поле 41 в ISO). Назначается в конфигурационных параметрах POS-терминала.
         /// </summary>
-        string TerminalID;
+        public string TerminalID { get; set; }
 
         /// <summary>
         /// Номер текущего журнала терминала
         /// </summary>
-        string BatchNo;
+        public string BatchNo { get; set; }
 
         /// <summary>
         /// Название приложения для чип-карты
         /// </summary>
-        string ApplicationLabel;
+        public string ApplicationLabel { get; set; }
 
         /// <summary>
         /// Текстовая интерпретация кода ответа хоста
         /// </summary>
-        string VisualHostResponse;
+        public string VisualHostResponse { get; set; }
 
         /// <summary>
         /// Код валюты согласно стандарту ISO 4217.
         /// </summary>
-        string Currency;
+        public string Currency { get; set; }
 
         /// <summary>
         /// Шифрованные данные карты
         /// </summary>
-        string CardDataEnc;
+        public string CardDataEnc { get; set; }
 
         /// <summary>
         /// Информация о финансовых эквайерах. Одному эквайеру соответствует ровно один параметр, состоящий из слова Acquirer и следующим за ним двузначным номером от 01 до 99. Значение каждого параметра представляет собой структуру вида NMITR, где:
@@ -228,7 +157,7 @@ namespace KZ_Ingenico_EPI
         /// T – идентификатор терминала(8 байт, значение поля “Card Acceptor Terminal”);
         /// R – зарезервировано(2 байта).
         /// </summary>
-        string Acquirer01;
+        public string Acquirer01 { get; set; }
 
         /// <summary>
         /// Байт 0, представлен первой парой шестнадцатиричных цифр, биты:
@@ -248,44 +177,73 @@ namespace KZ_Ingenico_EPI
         /// 7 – должен быть установлен
         /// Байт 2 зарезервирован.Должен быть установлен в 0x20
         /// </summary>
-        string Flags;
+        public string Flags { get; set; }
 
         /// <summary>
         /// Дополнительные данные для систем лояльности.
         /// </summary>
-        string ExtData;
+        public string ExtData { get; set; }
 
         /// <summary>
         /// Результат диалога для операции DLG
         /// </summary>
-        string DialogResult;
-    }
+        public string DialogResult { get; set; }
 
-    class TrposiXLib
-    {
-        #region Export 
-        [DllImport("Supply folder\\TrposX.dll", CallingConvention = CallingConvention.Cdecl)]
-        private static extern int TRPOSX_Init(string pathToConfig, TRGUI_ScreenShowDelegate ScreenShow, TRGUI_ScreenCloseDelegate ScreenClose);
-
-        [DllImport("Supply folder\\TrposX.dll", CallingConvention = CallingConvention.Cdecl)]
-        public static extern int TRPOSX_Proc(string inParams, out int lenOutParams, out int lenReceipt);
-
-        [DllImport("Supply folder\\TrposX.dll", CallingConvention = CallingConvention.Cdecl)]
-        public static extern int TRPOSX_GetRsp(string outParams, out string receipt);
-
-        [DllImport("Supply folder\\TrposX.dll", CallingConvention = CallingConvention.Cdecl)]
-        public static extern int TRPOSX_Close();
-        #endregion
-
-
-        public int ScreenShow(ScreenParams screenParams)
+        public Response()
         {
-            return 0;
+            this.Acquirer01 = String.Empty;
+            this.ApplicationID = String.Empty;
+            this.ApplicationLabel = String.Empty;
+            this.Approve = String.Empty;
+            this.AuthorizationID = String.Empty;
+            this.BatchNo = String.Empty;
+            this.CardDataEnc = String.Empty;
+            this.CardholderVerificationCharacter = String.Empty;
+            this.Currency = String.Empty;
+            this.Date = String.Empty;
+            this.DialogResult = String.Empty;
+            this.ECRNumber = String.Empty;
+            this.ECRReceiptNumber = String.Empty;
+            this.ExpDate = String.Empty;
+            this.ExtData = String.Empty;
+            this.Flags = String.Empty;
+            this.InvoiceNumber = String.Empty;
+            this.IssuerName = String.Empty;
+            this.MerchantNo = String.Empty;
+            this.MessageID = String.Empty;
+            this.PAN = String.Empty;
+            this.POSConditionCode = String.Empty;
+            this.POSEntryMode = String.Empty;
+            this.ProcessingCode = String.Empty;
+            this.ResponseCode = String.Empty;
+            this.RRN = String.Empty;
+            this.TC = String.Empty;
+            this.TerminalID = String.Empty;
+            this.Time = String.Empty;
+            this.TransactionAmount = String.Empty;
+            this.TVR = String.Empty;
+            this.VisualHostResponse = String.Empty;
         }
 
-        private int ScreenClose()
+        void CompliteTags(string inStr)
         {
-            return 0;
+            string testString = "MessageID=PUR\r\nResponseCode=00\r\nECRnumber=01\r\nECRReceiptNumber=1000000073\r\nTransactionAmount=000000001000\r\nTransactionAmount2=000000000000\r\nFlags=80C080\r\nPAN=5***********3529\r\nInvoiceNumber=990011\r\nAuthorizationID=XXXXXX\r\nDate=1711\r\nTime=2050\r\nIssuerName=ECMC    \r\nMerchantNo=398000002292675\r\nProcessingCode=000000\r\nPOSEntryMode=072\r\nPOSConditionCode=00\r\nCardholderVerificationCharacter= \r\nRRN=000000000000\r\nApplicationID=A0000000041010\r\nTC=2A1D584A5F4A658C\r\nTVR=0000008000\r\nTerminalID=02292675\r\nBatchNo=000003\r\nApplicationLabel=Debit MasterCard\r\nVisualHostResponse=ОДОБРЕНО XXXXXX\r\nApprove=Y\r\nCurrency=398\r\n\0";
+            string[] line = testString.Split('\n');
+
+            foreach (string mess in line)
+            {
+                string res = mess.Trim();
+                string[] tags = res.Split('=');
+                
+            }
+
         }
+
+        //private string[] CleanArray(string [] inArray)
+        //{
+        //    string[] outArray;
+        //    for (int i=0; i< inArray.Length-1)
+        //    return outArray;
+        //}
     }
 }

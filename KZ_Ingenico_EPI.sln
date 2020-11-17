@@ -7,6 +7,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "KZ_Ingenico_EPI", "KZ_Ingen
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "KZ_IgenicoApp", "KZ_IgenicoApp\KZ_IgenicoApp.csproj", "{07B244B2-81EE-4278-B0D3-F50DC41B95FE}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "KZ_Ingenico_TransportLibApp", "KZ_Ingenico_TransportLibApp\KZ_Ingenico_TransportLibApp.csproj", "{6AC47ABA-75F6-4980-8F62-F7465899CDAA}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -21,6 +23,10 @@ Global
 		{07B244B2-81EE-4278-B0D3-F50DC41B95FE}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{07B244B2-81EE-4278-B0D3-F50DC41B95FE}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{07B244B2-81EE-4278-B0D3-F50DC41B95FE}.Release|Any CPU.Build.0 = Release|Any CPU
+		{6AC47ABA-75F6-4980-8F62-F7465899CDAA}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{6AC47ABA-75F6-4980-8F62-F7465899CDAA}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{6AC47ABA-75F6-4980-8F62-F7465899CDAA}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{6AC47ABA-75F6-4980-8F62-F7465899CDAA}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

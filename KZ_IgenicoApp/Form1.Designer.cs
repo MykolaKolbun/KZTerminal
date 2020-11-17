@@ -41,85 +41,97 @@
             // 
             // btnConnect
             // 
-            this.btnConnect.Location = new System.Drawing.Point(65, 50);
+            this.btnConnect.Location = new System.Drawing.Point(45, 40);
+            this.btnConnect.Margin = new System.Windows.Forms.Padding(2);
             this.btnConnect.Name = "btnConnect";
-            this.btnConnect.Size = new System.Drawing.Size(75, 23);
+            this.btnConnect.Size = new System.Drawing.Size(66, 19);
             this.btnConnect.TabIndex = 0;
             this.btnConnect.Text = "Connect";
             this.btnConnect.UseVisualStyleBackColor = true;
+            this.btnConnect.Click += new System.EventHandler(this.btnConnect_Click);
             // 
             // tbConnectionString
             // 
-            this.tbConnectionString.Location = new System.Drawing.Point(10, 25);
+            this.tbConnectionString.Location = new System.Drawing.Point(60, 15);
+            this.tbConnectionString.Margin = new System.Windows.Forms.Padding(2);
             this.tbConnectionString.Name = "tbConnectionString";
-            this.tbConnectionString.Size = new System.Drawing.Size(130, 22);
+            this.tbConnectionString.Size = new System.Drawing.Size(52, 20);
             this.tbConnectionString.TabIndex = 1;
             // 
             // label1
             // 
             this.label1.AutoSize = true;
-            this.label1.Location = new System.Drawing.Point(5, 5);
+            this.label1.Location = new System.Drawing.Point(0, 15);
+            this.label1.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
             this.label1.Name = "label1";
-            this.label1.Size = new System.Drawing.Size(112, 16);
+            this.label1.Size = new System.Drawing.Size(58, 13);
             this.label1.TabIndex = 2;
-            this.label1.Text = "Connection String";
+            this.label1.Text = "TerminalID";
             // 
             // btnPurch
             // 
-            this.btnPurch.Location = new System.Drawing.Point(65, 120);
+            this.btnPurch.Location = new System.Drawing.Point(40, 105);
+            this.btnPurch.Margin = new System.Windows.Forms.Padding(2);
             this.btnPurch.Name = "btnPurch";
-            this.btnPurch.Size = new System.Drawing.Size(75, 23);
+            this.btnPurch.Size = new System.Drawing.Size(65, 19);
             this.btnPurch.TabIndex = 3;
             this.btnPurch.Text = "Purchase";
             this.btnPurch.UseVisualStyleBackColor = true;
+            this.btnPurch.Click += new System.EventHandler(this.btnPurch_Click);
             // 
             // tbAmount
             // 
-            this.tbAmount.Location = new System.Drawing.Point(80, 90);
+            this.tbAmount.Location = new System.Drawing.Point(65, 70);
+            this.tbAmount.Margin = new System.Windows.Forms.Padding(2);
             this.tbAmount.Name = "tbAmount";
-            this.tbAmount.Size = new System.Drawing.Size(60, 22);
+            this.tbAmount.Size = new System.Drawing.Size(46, 20);
             this.tbAmount.TabIndex = 4;
             // 
             // label2
             // 
             this.label2.AutoSize = true;
-            this.label2.Location = new System.Drawing.Point(20, 95);
+            this.label2.Location = new System.Drawing.Point(10, 75);
+            this.label2.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
             this.label2.Name = "label2";
-            this.label2.Size = new System.Drawing.Size(56, 16);
+            this.label2.Size = new System.Drawing.Size(46, 13);
             this.label2.TabIndex = 5;
             this.label2.Text = "Amount:";
             // 
             // btnClose
             // 
-            this.btnClose.Location = new System.Drawing.Point(65, 240);
+            this.btnClose.Location = new System.Drawing.Point(5, 195);
+            this.btnClose.Margin = new System.Windows.Forms.Padding(2);
             this.btnClose.Name = "btnClose";
-            this.btnClose.Size = new System.Drawing.Size(75, 23);
+            this.btnClose.Size = new System.Drawing.Size(100, 19);
             this.btnClose.TabIndex = 6;
             this.btnClose.Text = "Close";
             this.btnClose.UseVisualStyleBackColor = true;
+            this.btnClose.Click += new System.EventHandler(this.btnClose_Click);
             // 
             // richTextBox1
             // 
-            this.richTextBox1.Location = new System.Drawing.Point(170, 5);
+            this.richTextBox1.Location = new System.Drawing.Point(115, 4);
+            this.richTextBox1.Margin = new System.Windows.Forms.Padding(2);
             this.richTextBox1.Name = "richTextBox1";
-            this.richTextBox1.Size = new System.Drawing.Size(320, 255);
+            this.richTextBox1.Size = new System.Drawing.Size(254, 208);
             this.richTextBox1.TabIndex = 7;
             this.richTextBox1.Text = "";
             // 
             // btnSettlement
             // 
-            this.btnSettlement.Location = new System.Drawing.Point(65, 175);
+            this.btnSettlement.Location = new System.Drawing.Point(40, 142);
+            this.btnSettlement.Margin = new System.Windows.Forms.Padding(2);
             this.btnSettlement.Name = "btnSettlement";
-            this.btnSettlement.Size = new System.Drawing.Size(75, 23);
+            this.btnSettlement.Size = new System.Drawing.Size(65, 19);
             this.btnSettlement.TabIndex = 8;
             this.btnSettlement.Text = "Settlement";
             this.btnSettlement.UseVisualStyleBackColor = true;
             // 
             // Form1
             // 
-            this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 16F);
+            this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(494, 267);
+            this.ClientSize = new System.Drawing.Size(370, 217);
             this.Controls.Add(this.btnSettlement);
             this.Controls.Add(this.richTextBox1);
             this.Controls.Add(this.btnClose);
@@ -129,6 +141,7 @@
             this.Controls.Add(this.label1);
             this.Controls.Add(this.tbConnectionString);
             this.Controls.Add(this.btnConnect);
+            this.Margin = new System.Windows.Forms.Padding(2);
             this.Name = "Form1";
             this.Text = "Form1";
             this.ResumeLayout(false);

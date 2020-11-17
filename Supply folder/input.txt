@@ -1,4 +1,4 @@
 MessageID=PUR
 ECRnumber=01
-ECRReceiptNumber=1000000001
+ECRReceiptNumber=1000000062
 TransactionAmount=1000

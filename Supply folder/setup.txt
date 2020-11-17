@@ -13,7 +13,7 @@ IP=127.0.0.1
 Port=16500
 POSport=20500
 
-T1=2
+T1=3
 T1repeat=3
 T2=120
 Tici=300
@@ -35,6 +35,7 @@ Encoding=win1251
 SuppressExtraRC=1
 ResultWinSuppress=1
 CardholderVerification=
+SRVSettleEnable=1
 Server=1
 
 DisplayMode=3
