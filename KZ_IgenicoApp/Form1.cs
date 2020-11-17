@@ -37,7 +37,7 @@ namespace KZ_IgenicoApp
         {
             try
             {
-                MessageBox.Show($"Result: {pos.Purchase(1000)}");
+                MessageBox.Show($"Result: {pos.Purchase(1200)}");
             }
             catch (Exception ex)
             {
@@ -50,6 +50,19 @@ namespace KZ_IgenicoApp
         {
             pos.Close();
             this.Close();
+        }
+
+        private void btnSettlement_Click(object sender, EventArgs e)
+        {
+            try
+            {
+                MessageBox.Show($"Result: {pos.Settlement()}");
+            }
+            catch (Exception ex)
+            {
+                pos.Close();
+                MessageBox.Show($"Exception: {ex.Message}");
+            }
         }
     }
 }

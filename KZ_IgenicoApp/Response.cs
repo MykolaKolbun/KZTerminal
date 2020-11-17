@@ -234,16 +234,152 @@ namespace KZ_IgenicoApp
             {
                 string res = mess.Trim();
                 string[] tags = res.Split('=');
-                
+
             }
 
         }
+        public Response (string respString)
+        {
+            this.Acquirer01 = String.Empty;
+            this.ApplicationID = String.Empty;
+            this.ApplicationLabel = String.Empty;
+            this.Approve = String.Empty;
+            this.AuthorizationID = String.Empty;
+            this.BatchNo = String.Empty;
+            this.CardDataEnc = String.Empty;
+            this.CardholderVerificationCharacter = String.Empty;
+            this.Currency = String.Empty;
+            this.Date = String.Empty;
+            this.DialogResult = String.Empty;
+            this.ECRNumber = String.Empty;
+            this.ECRReceiptNumber = String.Empty;
+            this.ExpDate = String.Empty;
+            this.ExtData = String.Empty;
+            this.Flags = String.Empty;
+            this.InvoiceNumber = String.Empty;
+            this.IssuerName = String.Empty;
+            this.MerchantNo = String.Empty;
+            this.MessageID = String.Empty;
+            this.PAN = String.Empty;
+            this.POSConditionCode = String.Empty;
+            this.POSEntryMode = String.Empty;
+            this.ProcessingCode = String.Empty;
+            this.ResponseCode = String.Empty;
+            this.RRN = String.Empty;
+            this.TC = String.Empty;
+            this.TerminalID = String.Empty;
+            this.Time = String.Empty;
+            this.TransactionAmount = String.Empty;
+            this.TVR = String.Empty;
+            this.VisualHostResponse = String.Empty;
 
-        //private string[] CleanArray(string [] inArray)
-        //{
-        //    string[] outArray;
-        //    for (int i=0; i< inArray.Length-1)
-        //    return outArray;
-        //}
+            respString = respString.Remove(respString.Length - 1);
+            string[] lines = respString.Split('\n');
+            Array.Resize(ref lines, lines.Length - 1);
+            foreach (string line in lines)
+            {
+                string res = line.Trim();
+                string[] tags = res.Split('=');
+                switch (tags[0])
+                {
+                    case "MessageID":
+                        this.MessageID = tags[1];
+                        break;
+                    case "Approve":
+                        this.Approve = tags[1];
+                        break;
+                    case "ECRNumber":
+                        this.ECRNumber = tags[1];
+                        break;
+                    case "ECRReceiptNumber":
+                        this.ECRReceiptNumber = tags[1];
+                        break;
+                    case "ResponseCode":
+                        this.ResponseCode = tags[1];
+                        break;
+                    case "TransactionAmount":
+                        this.TransactionAmount = tags[1];
+                        break;
+                    case "PAN":
+                        this.PAN = tags[1];
+                        break;
+                    case "ExpDate":
+                        this.ExpDate = tags[1];
+                        break;
+                    case "InvoiceNumber":
+                        this.InvoiceNumber = tags[1];
+                        break;
+                    case "AuthorizationID":
+                        this.AuthorizationID = tags[1];
+                        break;
+                    case "Date":
+                        this.Date = tags[1];
+                        break;
+                    case "Time":
+                        this.Time = tags[1];
+                        break;
+                    case "IssuerName":
+                        this.IssuerName = tags[1];
+                        break;
+                    case "MerchantNo":
+                        this.MerchantNo = tags[1];
+                        break;
+                    case "ProcessingCode":
+                        this.ProcessingCode = tags[1];
+                        break;
+                    case "POSEntryMode":
+                        this.POSEntryMode = tags[1];
+                        break;
+                    case "POSConditionCode":
+                        this.POSConditionCode = tags[1];
+                        break;
+                    case "CardholderVerificationCharacter":
+                        this.CardholderVerificationCharacter = tags[1];
+                        break;
+                    case "RRN":
+                        this.RRN = tags[1];
+                        break;
+                    case "ApplicationID":
+                        this.ApplicationID = tags[1];
+                        break;
+                    case "TC":
+                        this.TC = tags[1];
+                        break;
+                    case "TVR":
+                        this.TVR = tags[1];
+                        break;
+                    case "TerminalID":
+                        this.TerminalID = tags[1];
+                        break;
+                    case "BatchNo":
+                        this.BatchNo = tags[1];
+                        break;
+                    case "ApplicationLabel":
+                        this.ApplicationLabel = tags[1];
+                        break;
+                    case "VisualHostResponse":
+                        this.VisualHostResponse = tags[1];
+                        break;
+                    case "Currency":
+                        this.Currency = tags[1];
+                        break;
+                    case "CardDataEnc":
+                        this.CardDataEnc = tags[1];
+                        break;
+                    case "Acquirer01":
+                        this.Acquirer01 = tags[1];
+                        break;
+                    case "Flags":
+                        this.Flags = tags[1];
+                        break;
+                    case "ExtData":
+                        this.ExtData = tags[1];
+                        break;
+                    case "DialogResult":
+                        this.DialogResult = tags[1];
+                        break;
+                }
+            }
+        }
     }
 }

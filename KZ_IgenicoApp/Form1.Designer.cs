@@ -126,6 +126,7 @@
             this.btnSettlement.TabIndex = 8;
             this.btnSettlement.Text = "Settlement";
             this.btnSettlement.UseVisualStyleBackColor = true;
+            this.btnSettlement.Click += new System.EventHandler(this.btnSettlement_Click);
             // 
             // Form1
             // 
