@@ -2,11 +2,8 @@
 using System.Runtime.InteropServices;
 using System.Text;
 
-namespace KZ_IgenicoApp
+namespace KZ_Ingenico_EPI
 {
-    
-
-
     public delegate int TRGUI_ScreenShowDelegate(IntPtr pScreenParams);
     public delegate void TRGUI_ScreenCloseDelegate();
 
@@ -51,7 +48,7 @@ namespace KZ_IgenicoApp
         /// <summary>
         /// Номер операции ККМ. Хранится в журнале POS-терминала для возможности поиска транзакции по данному ключу. Обязательное поле для финансовых операций и сверки, необязательное – для сервисной.
         /// </summary>
-        public int ECRReceiptNumber;
+        public string ECRReceiptNumber;
 
         /// <summary>
         /// Итоговая сумма транзакции. Десятичная точка не передается, а только подразумевается.
@@ -81,7 +78,7 @@ namespace KZ_IgenicoApp
     }
     public static class TRposXNative
     {
-        
+
         public delegate int TRGUI_ScreenShowDelegate_My(ref ScreenParams pScreenParams);
         public delegate int TRGUI_ScreenCloseDelegate_My();
         #region Export 
@@ -107,7 +104,7 @@ namespace KZ_IgenicoApp
         #endregion
     }
 
-    class TrposiXLib
+    class TrposXLib
     {
         #region Fields
         public Response resp;
@@ -140,18 +137,18 @@ namespace KZ_IgenicoApp
             return TRposXNative.TRPOSX_Close();
         }
 
-        public int Purchase(int amount)
+        public int Purchase(int amount, string RefferenseID, string terminalID)
         {
             string inParamsStr;
             InputParams inParams = new InputParams();
-            inParams.ECRnumber = "01";
+            inParams.ECRnumber = terminalID;
             inParams.MessageID = "PUR";
             inParams.TransactionAmount = amount;
-            inParams.ECRReceiptNumber = ECRReceipt;
+            inParams.ECRReceiptNumber = RefferenseID;
             //inParamsStr = "MessageID="+inParams.MessageID + '\n' + "ECRnumber="+inParams.ECRnumber + '\n' + "ECRReceiptNumber="+inParams.ECRReceiptNumber.ToString() + '\n' + "TransactionAmount="+inParams.TransactionAmount.ToString()+ '\n';
             inParamsStr = $"MessageID={inParams.MessageID}{Environment.NewLine}ECRnumber={inParams.ECRnumber}{Environment.NewLine}ECRReceiptNumber={inParams.ECRReceiptNumber.ToString()}{Environment.NewLine}TransactionAmount={inParams.TransactionAmount.ToString()}{Environment.NewLine}";
             int error = TRposXNative.TRPOSX_Proc(inParamsStr, out int outLen, out int lenReceipt);
-            if(error==0)
+            if (error == 0)
             {
                 IntPtr bufferResponse = Marshal.AllocHGlobal(outLen);
                 IntPtr bufferReceipt = Marshal.AllocHGlobal(lenReceipt);
@@ -185,6 +182,19 @@ namespace KZ_IgenicoApp
             return error;
         }
 
+        public int Cancel(string RefferenseID, string terminalID)
+        {
+            string inParamsStr;
+            InputParams inParams = new InputParams();
+            inParams.ECRnumber = terminalID;
+            inParams.MessageID = "VOI";
+            inParams.ECRReceiptNumber = RefferenseID;
+            //inParamsStr = "MessageID="+inParams.MessageID + '\n' + "ECRnumber="+inParams.ECRnumber + '\n' + "ECRReceiptNumber="+inParams.ECRReceiptNumber.ToString() + '\n' + "TransactionAmount="+inParams.TransactionAmount.ToString()+ '\n';
+            inParamsStr = $"MessageID={inParams.MessageID}{Environment.NewLine}ECRnumber={inParams.ECRnumber}{Environment.NewLine}ECRReceiptNumber={inParams.ECRReceiptNumber.ToString()}{Environment.NewLine}TransactionAmount={inParams.TransactionAmount.ToString()}{Environment.NewLine}";
+            int error = TRposXNative.TRPOSX_Proc(inParamsStr, out int outLen, out int lenReceipt);
+            return error;
+        }
+
         public int Settlement()
         {
             string inParamsStr;
@@ -207,11 +217,6 @@ namespace KZ_IgenicoApp
             inParamsStr = $"MessageID={inParams.MessageID}{Environment.NewLine}ECRnumber={inParams.ECRnumber}{Environment.NewLine}SRVsubfunction={inParams.SRVSubfunction}{Environment.NewLine}";
             int error = TRposXNative.TRPOSX_Proc(inParamsStr, out int outLen, out int lenReceipt);
             return error;
-        }
-
-        public int GetResponse()
-        {
-            return 0;
         }
     }
 }

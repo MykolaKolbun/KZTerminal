@@ -37,7 +37,15 @@ namespace KZ_IgenicoApp
         {
             try
             {
-                MessageBox.Show($"Result: {pos.Purchase(1200)}");
+                int error = pos.Purchase(1200);
+                if (error == 0)
+                {
+                    MessageBox.Show(pos.resp.VisualHostResponse);
+                    if (pos.resp.ResponseCode == 0 && pos.resp.ResponseCode != null)
+                        MessageBox.Show(pos.resp.Slip);
+                }
+                else
+                    MessageBox.Show($"Result Error: {error}");
             }
             catch (Exception ex)
             {

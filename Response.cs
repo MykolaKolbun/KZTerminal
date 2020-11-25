@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace KZ_IgenicoApp
+namespace KZ_Ingenico_EPI
 {
     class Response
     {
@@ -231,7 +231,7 @@ namespace KZ_IgenicoApp
             this.Receipt = String.Empty;
         }
 
-        public Response (string respString)
+        public Response(string respString)
         {
             this.Acquirer01 = String.Empty;
             this.ApplicationID = String.Empty;
