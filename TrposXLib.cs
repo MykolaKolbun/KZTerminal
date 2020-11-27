@@ -1,11 +1,13 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Runtime.InteropServices;
 using System.Text;
+using System.Windows.Forms;
 
 namespace KZ_Ingenico_EPI
 {
-    public delegate int TRGUI_ScreenShowDelegate(IntPtr pScreenParams);
-    public delegate void TRGUI_ScreenCloseDelegate();
+    public delegate int ScreenShowDelegate(ScreenParams pScreenParams);
+    public delegate int ScreenCloseDelegate();
 
     [StructLayout(LayoutKind.Sequential, CharSet = CharSet.Auto)]
     public class ScreenParams
@@ -24,6 +26,51 @@ namespace KZ_Ingenico_EPI
         public CurrencyParams CurParam; // [in]
         public Int32 eventKey; // [out]
         public IntPtr pBuf; // [in]
+
+        public void Print()
+        {
+            LoggerPermanent log = new LoggerPermanent("ScreenShow", "01");
+            IntPtr bufferResponse = Marshal.AllocHGlobal(20);
+            bufferResponse = this.pTitle;
+            char[] charBuff = new char[20];
+            Marshal.Copy(bufferResponse,charBuff, 0, charBuff.Length);
+            string title = Marshal.PtrToStringAuto(this.pTitle);
+            List<string> str = new List<string>();
+            if (this.pStr != null)
+            {
+                foreach (IntPtr s in this.pStr)
+                {
+                    if (s != null)
+                    {
+                        str.Add(Marshal.PtrToStringAuto(s));
+                    }
+                }
+            }
+            log.Write($"New---------------");
+            if (!String.IsNullOrEmpty(title))
+            {
+                log.Write($"Title:{title}");
+                log.Write($"Title:{ConvertString(title)}");
+            }
+            foreach (string s in str)
+            {
+                if (!String.IsNullOrEmpty(s))
+                {
+                    log.Write($"String:{ConvertString(s)}");
+                }
+            }
+            log.Close();
+        }
+
+        private static string ConvertString(string inLine)
+        {
+            Encoding WINDOWS1251 = Encoding.GetEncoding(1251);
+            Encoding UTF8 = Encoding.UTF8;
+            Encoding ASCII = Encoding.ASCII;
+
+            string outStr = WINDOWS1251.GetString(ASCII.GetBytes(inLine));
+            return outStr;
+        }
     };
 
     [StructLayout(LayoutKind.Sequential, CharSet = CharSet.Ansi)]
@@ -78,9 +125,6 @@ namespace KZ_Ingenico_EPI
     }
     public static class TRposXNative
     {
-
-        public delegate int TRGUI_ScreenShowDelegate_My(ref ScreenParams pScreenParams);
-        public delegate int TRGUI_ScreenCloseDelegate_My();
         #region Export 
 
         [DllImport("user32.dll")]
@@ -91,7 +135,7 @@ namespace KZ_Ingenico_EPI
 
 
         [DllImport(@"c:\My Programming\.Net\KZ_Ingenico_EPI\Supply folder\TrposX.dll", CallingConvention = CallingConvention.Cdecl)]
-        public static extern int TRPOSX_Init(string pathToConfig, [In, Out] TRGUI_ScreenShowDelegate_My TRGUI_ScreenShow, [In, Out] TRGUI_ScreenCloseDelegate_My TRGUI_ScreenClose);
+        public static extern int TRPOSX_Init(string pathToConfig, ScreenShowDelegate TRGUI_ScreenShow, ScreenCloseDelegate TRGUI_ScreenClose);
 
         [DllImport(@"c:\My Programming\.Net\KZ_Ingenico_EPI\Supply folder\TrposX.dll", CallingConvention = CallingConvention.Cdecl)]
         public static extern int TRPOSX_Proc(string inParams, out int lenOutParams, out int lenReceipt);
@@ -101,6 +145,11 @@ namespace KZ_Ingenico_EPI
 
         [DllImport(@"c:\My Programming\.Net\KZ_Ingenico_EPI\Supply folder\TrposX.dll", CallingConvention = CallingConvention.Cdecl)]
         public static extern int TRPOSX_Close();
+
+        [DllImport(@"c:\My Programming\.Net\KZ_Ingenico_EPI\Supply folder\trgui.dll", CallingConvention = CallingConvention.Cdecl)]
+        public static extern int ScreenShow([In, Out] IntPtr pScreenParams);
+        [DllImport(@"c:\My Programming\.Net\KZ_Ingenico_EPI\Supply folder\trgui.dll", CallingConvention = CallingConvention.Cdecl)]
+        public static extern int ScreenClose();
         #endregion
     }
 
@@ -108,18 +157,18 @@ namespace KZ_Ingenico_EPI
     {
         #region Fields
         public Response resp;
+        
         #endregion
 
-        //CustomerDialog cd;
-        //ScreenParams screen;
-        //string responseString = "";
-        //string receiptString = "";
-        public int TRGUI_ScreenShow(ref ScreenParams _screen)
+        public int ScreenShow(ScreenParams _screen)
         {
-            return 0;
+            IntPtr sPar = Marshal.AllocHGlobal(92);
+            _screen.Print();
+            Marshal.StructureToPtr(_screen, sPar, false);
+            return TRposXNative.ScreenShow(sPar);
         }
 
-        public int TRGUI_ScreenClose()
+        public int ScreenClose()
         {
             return 0;
         }
@@ -128,8 +177,11 @@ namespace KZ_Ingenico_EPI
 
         public int Init()
         {
+            //ScreenParams sp = new ScreenParams();
+            ScreenShowDelegate ssd = new ScreenShowDelegate(ScreenShow);
+            ScreenCloseDelegate scd = new ScreenCloseDelegate(ScreenClose);
             string configPath = @"c:\My Programming\.Net\KZ_Ingenico_EPI\Supply folder\setup.txt";
-            return TRposXNative.TRPOSX_Init(configPath, TRGUI_ScreenShow, TRGUI_ScreenClose);
+            return TRposXNative.TRPOSX_Init(configPath, ssd, scd);
         }
 
         public int Close()

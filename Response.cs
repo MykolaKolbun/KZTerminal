@@ -93,7 +93,6 @@ namespace KZ_Ingenico_EPI
         /// </summary>
         public string POSConditionCode { get; set; }
 
-
         /// <summary>
         /// “P” – PIN-код проверялся,“S” – Необходима проверка подписи,“C” – проверялся pin-код и требуется проверка подписи,“ “ – параметр отсутствует, проверка не требуется,
         /// /// </summary>

@@ -37,6 +37,7 @@
             this.btnClose = new System.Windows.Forms.Button();
             this.richTextBox1 = new System.Windows.Forms.RichTextBox();
             this.btnSettlement = new System.Windows.Forms.Button();
+            this.btnCancel = new System.Windows.Forms.Button();
             this.SuspendLayout();
             // 
             // btnConnect
@@ -119,7 +120,7 @@
             // 
             // btnSettlement
             // 
-            this.btnSettlement.Location = new System.Drawing.Point(40, 142);
+            this.btnSettlement.Location = new System.Drawing.Point(40, 170);
             this.btnSettlement.Margin = new System.Windows.Forms.Padding(2);
             this.btnSettlement.Name = "btnSettlement";
             this.btnSettlement.Size = new System.Drawing.Size(65, 19);
@@ -128,11 +129,22 @@
             this.btnSettlement.UseVisualStyleBackColor = true;
             this.btnSettlement.Click += new System.EventHandler(this.btnSettlement_Click);
             // 
+            // btnCancel
+            // 
+            this.btnCancel.Location = new System.Drawing.Point(40, 130);
+            this.btnCancel.Name = "btnCancel";
+            this.btnCancel.Size = new System.Drawing.Size(65, 20);
+            this.btnCancel.TabIndex = 9;
+            this.btnCancel.Text = "Cancel";
+            this.btnCancel.UseVisualStyleBackColor = true;
+            this.btnCancel.Click += new System.EventHandler(this.btnCancel_Click);
+            // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(370, 217);
+            this.Controls.Add(this.btnCancel);
             this.Controls.Add(this.btnSettlement);
             this.Controls.Add(this.richTextBox1);
             this.Controls.Add(this.btnClose);
@@ -161,6 +173,7 @@
         private System.Windows.Forms.Button btnClose;
         private System.Windows.Forms.RichTextBox richTextBox1;
         private System.Windows.Forms.Button btnSettlement;
+        private System.Windows.Forms.Button btnCancel;
     }
 }
 

@@ -11,7 +11,7 @@ namespace KZ_Ingenico_EPI
 
         public CountTransaction(string machinID)
         {
-            this.Path = $@"C:\FiscalFolder\TransactionCounts_{machinID}.dat";
+            this.Path = $@"{StringValue.WorkingDirectory}EPI\TransactionCounts_{machinID}.dat";
         }
         public void Send(int count)
         {

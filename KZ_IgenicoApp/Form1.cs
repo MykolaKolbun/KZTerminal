@@ -64,13 +64,18 @@ namespace KZ_IgenicoApp
         {
             try
             {
-                MessageBox.Show($"Result: {pos.Settlement()}");
+                MessageBox.Show($"Result: {pos.Service()}");
             }
             catch (Exception ex)
             {
                 pos.Close();
                 MessageBox.Show($"Exception: {ex.Message}");
             }
+        }
+
+        private void btnCancel_Click(object sender, EventArgs e)
+        {
+            pos.Cancel();
         }
     }
 }

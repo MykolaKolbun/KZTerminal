@@ -5,6 +5,7 @@ using System.Globalization;
 using System.Diagnostics;
 using System.Threading;
 using System.Timers;
+using System.IO;
 
 namespace KZ_Ingenico_EPI
 {
@@ -25,7 +26,6 @@ namespace KZ_Ingenico_EPI
         private string _userName = String.Empty;
         private string _shiftId = String.Empty;
         private bool isTerminalReady = true;
-        private bool terminalBlocked = false;
         private bool _activated = false;
         private bool _inTransaction = false;
         bool transactionCanceled = false;
@@ -64,6 +64,7 @@ namespace KZ_Ingenico_EPI
         /// </summary>
         public void Dispose()
         {
+            reader.Close();
             this.Dispose(true);
             GC.SuppressFinalize(this);
         }
@@ -91,6 +92,7 @@ namespace KZ_Ingenico_EPI
         /// </summary>
         ~EPI_CashDesk()
         {
+            reader.Close();
             this.Dispose(false);
         }
 
@@ -119,6 +121,7 @@ namespace KZ_Ingenico_EPI
             this.deviceType = configuration.DeviceType;
             this.deviceID = configuration.DeviceId;
             terminalID = configuration.CommunicationChannel;
+            CreateFolders();
             Logger log = new Logger(this.ShortName, this.deviceID);
             log.Write("Begin Install");
             int error = reader.Init();
@@ -178,8 +181,8 @@ namespace KZ_Ingenico_EPI
             lastTransaction = new TransactionFailedResult(TransactionType.Debit, DateTime.Now);
             Logger log = new Logger(this.ShortName, this.deviceID);
             log.Write($"Debit(Amount: {debitData.Amount}, RefID: {debitData.ReferenceId})");
-            SQLConnect sql = new SQLConnect(deviceID);
-            SkiData.ElectronicPayment.Card card = SkiData.ElectronicPayment.Card.NoCard;
+            SQLConnect sql = new SQLConnect();
+            Card card = Card.NoCard;
             if (sql.IsSQLOnline())
             {
                 try
@@ -193,6 +196,11 @@ namespace KZ_Ingenico_EPI
                             log.Write($"Authorization Process: {reader.resp.VisualHostResponse}");
                             transactionResultDone = true;
 
+                        }
+                        else
+                        {
+                            OnAction(new ActionEventArgs(reader.resp.VisualHostResponse, ActionType.DisplayCustomerMessage));
+                            log.Write($"Authorization Process: {reader.resp.VisualHostResponse}");
                         }
                     }
                 }
@@ -211,7 +219,7 @@ namespace KZ_Ingenico_EPI
                     {
                         if (debitData is ParkingTransactionData parkingTransactionData)
                         {
-                            card = new CreditCard(reader.resp.ExpDate, reader.resp.ExpDate, new CardIssuer(reader.resp.IssuerName));
+                            card = new CreditCard(reader.resp.PAN, reader.resp.ExpDate, new CardIssuer(reader.resp.IssuerName));
 
                             log.Write($"Finaly RefID:{parkingTransactionData.ReferenceId}, Ticket: {parkingTransactionData.TicketId}, Amount: {(int)parkingTransactionData.Amount}, CardNR(PAN): {card.Number} \nReceipt: \n{reader.resp.Slip}");
                             sql.AddLinePurch(this.deviceID, parkingTransactionData.ReferenceId, parkingTransactionData.TicketId, reader.resp.Slip, (int)parkingTransactionData.Amount, card.Number);
@@ -225,6 +233,33 @@ namespace KZ_Ingenico_EPI
                             doneResult.CustomerDisplayText = reader.resp.VisualHostResponse;
                             lastTransaction = doneResult;
                             OnAction(new ActionEventArgs(lastTransaction.CustomerDisplayText, ActionType.DisplayCustomerMessage));
+                        }
+                        else
+                        {
+                            card = new CreditCard(reader.resp.PAN, reader.resp.ExpDate, new CardIssuer(reader.resp.IssuerName));
+
+                            log.Write($"Finaly RefID:{debitData.ReferenceId}, Amount: {(int)debitData.Amount}, CardNR(PAN): {card.Number} \n\tReceipt: \n\t{reader.resp.Slip}");
+                            sql.AddLinePurch(this.deviceID, debitData.ReferenceId, "", reader.resp.Slip, (int)debitData.Amount, card.Number);
+                            TransactionDoneResult doneResult = new TransactionDoneResult(TransactionType.Debit, DateTime.Now);
+                            doneResult.ReceiptPrintoutMandatory = false;
+                            doneResult.Receipts = new Receipts(new Receipt(reader.resp.Receipt), new Receipt(reader.resp.Slip));
+                            doneResult.Amount = (int)debitData.Amount;
+                            doneResult.Card = card;
+                            doneResult.AuthorizationNumber = reader.resp.AuthorizationID;
+                            doneResult.TransactionNumber = reader.resp.RRN;
+                            doneResult.CustomerDisplayText = reader.resp.VisualHostResponse;
+                            lastTransaction = doneResult;
+                            OnAction(new ActionEventArgs(lastTransaction.CustomerDisplayText, ActionType.DisplayCustomerMessage));
+                        }
+                        CountTransaction counter = new CountTransaction(this.deviceID);                        
+                        int tr = counter.Get();
+                        if (tr < 5)
+                        {
+                            ManualSettelment();
+                        }
+                        else
+                        {
+                            counter.Send(tr--);
                         }
                     }
                     else
@@ -282,7 +317,6 @@ namespace KZ_Ingenico_EPI
         {
             Logger log = new Logger(this.ShortName, this.deviceID);
             log.Write("Cancel()");
-            transactionCanceled = true;
         }
 
         public Receipts RepeatReceipt()
@@ -510,10 +544,7 @@ namespace KZ_Ingenico_EPI
             _inTransaction = true;
             try
             {
-                SQLConnect sql = new SQLConnect(deviceID);
-                byte machineIDInt = 0;
-
-                Byte.TryParse(deviceID, out machineIDInt);
+                SQLConnect sql = new SQLConnect();
                 int error = reader.Settlement();
 
                 if (error == 1)
@@ -526,7 +557,7 @@ namespace KZ_Ingenico_EPI
                     counter.Send(99);
                     log.Write($"SettlementReceipt: {reader.resp.Receipt}");
                     log.Write($"SettlementResult. Amount {reader.resp.Receipt}, Count {reader.resp.Receipt}");
-                    sql.AddLineSettlement("settlement " + DateTime.Today.ToString("dd-MM-yyyy"), reader.resp.Receipt);
+                    sql.AddLineSettlement(this.deviceID, "settlement " + DateTime.Today.ToString("dd-MM-yyyy"), reader.resp.Receipt);
                 }
                 timeCheckTimer = new System.Timers.Timer(60000);
                 _inTransaction = false;
@@ -538,6 +569,23 @@ namespace KZ_Ingenico_EPI
                 OnTrace(TraceLevel.Info, $"Ingenico: Exception: {e.Message}");
                 timeCheckTimer = new System.Timers.Timer(60000);
             }
+        }
+
+        bool CreateFolders()
+        {
+            if (!Directory.Exists(StringValue.WorkingDirectory))
+            {
+                Directory.CreateDirectory(StringValue.WorkingDirectory);
+            }
+            if (!Directory.Exists($"{StringValue.WorkingDirectory}Log"))
+            {
+                Directory.CreateDirectory($"{StringValue.WorkingDirectory}Log");
+            }
+            if (!Directory.Exists($"{StringValue.WorkingDirectory}EPI"))
+            {
+                Directory.CreateDirectory($"{StringValue.WorkingDirectory}EPI");
+            }
+            return true;
         }
         #endregion
     }

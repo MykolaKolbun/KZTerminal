@@ -18,7 +18,7 @@ T1repeat=3
 T2=120
 Tici=300
 Timeout=60
-Treg=60
+Treg=5
 
 DisplayMode=3
 
@@ -33,10 +33,10 @@ SRVSettleEnable=0
 Encoding=win1251
 
 SuppressExtraRC=1
-ResultWinSuppress=1
+ResultWinSuppress=0
 CardholderVerification=
 SRVSettleEnable=1
-Server=1
+Server=0
 
 DisplayMode=3
 DisplayWidth=80

@@ -10,10 +10,14 @@ namespace KZ_IgenicoApp
     public delegate int TRGUI_ScreenShowDelegate(IntPtr pScreenParams);
     public delegate void TRGUI_ScreenCloseDelegate();
 
+    public delegate int ScreenShowDelegate(ScreenParams pScreenParams);
+    public delegate int ScreenCloseDelegate();
+
+
     [StructLayout(LayoutKind.Sequential, CharSet = CharSet.Auto)]
     public class ScreenParams
     {
-        public Int32 len; // [in]
+        public IntPtr len; // [in]
         public Int32 screenID; // [in]
         public Int32 maxInp; // [in]
         public Int32 minInp; // [in]
@@ -27,6 +31,25 @@ namespace KZ_IgenicoApp
         public CurrencyParams CurParam; // [in]
         public Int32 eventKey; // [out]
         public IntPtr pBuf; // [in]
+    };
+
+    [StructLayout(LayoutKind.Sequential, CharSet = CharSet.Auto)]
+    public class ScreenParams2
+    {
+        public Int32 len; // [in]
+        public Int32 screenID; // [in]
+        public Int32 maxInp; // [in]
+        public Int32 minInp; // [in]
+        public UInt32 format; // [in]
+        public IntPtr pTitle; // [in]
+        [MarshalAs(UnmanagedType.ByValArray, SizeConst = 10)]
+        public string pStr; // [in]
+        public string[] pInitStr; // [in]
+        public string pButton0; // [in]
+        public string pButton1; // [in]
+        public CurrencyParams CurParam; // [in]
+        public Int32 eventKey; // [out]
+        public string pBuf; // [in]
     };
 
     [StructLayout(LayoutKind.Sequential, CharSet = CharSet.Ansi)]
@@ -82,8 +105,7 @@ namespace KZ_IgenicoApp
     public static class TRposXNative
     {
         
-        public delegate int TRGUI_ScreenShowDelegate_My(ref ScreenParams pScreenParams);
-        public delegate int TRGUI_ScreenCloseDelegate_My();
+        
         #region Export 
 
         [DllImport("user32.dll")]
@@ -92,9 +114,8 @@ namespace KZ_IgenicoApp
         [DllImport("user32.dll")]
         static public extern bool OemToChar(IntPtr lpszSrc, [Out] StringBuilder lpszDst);
 
-
         [DllImport(@"c:\My Programming\.Net\KZ_Ingenico_EPI\Supply folder\TrposX.dll", CallingConvention = CallingConvention.Cdecl)]
-        public static extern int TRPOSX_Init(string pathToConfig, [In, Out] TRGUI_ScreenShowDelegate_My TRGUI_ScreenShow, [In, Out] TRGUI_ScreenCloseDelegate_My TRGUI_ScreenClose);
+        public static extern int TRPOSX_Init(string pathToConfig, ScreenShowDelegate TRGUI_ScreenShow, ScreenCloseDelegate TRGUI_ScreenClose);
 
         [DllImport(@"c:\My Programming\.Net\KZ_Ingenico_EPI\Supply folder\TrposX.dll", CallingConvention = CallingConvention.Cdecl)]
         public static extern int TRPOSX_Proc(string inParams, out int lenOutParams, out int lenReceipt);
@@ -104,6 +125,12 @@ namespace KZ_IgenicoApp
 
         [DllImport(@"c:\My Programming\.Net\KZ_Ingenico_EPI\Supply folder\TrposX.dll", CallingConvention = CallingConvention.Cdecl)]
         public static extern int TRPOSX_Close();
+
+        [DllImport(@"c:\My Programming\.Net\KZ_Ingenico_EPI\Supply folder\trgui.dll", CallingConvention = CallingConvention.Cdecl)]
+        public static extern int ScreenShow(IntPtr pScreenParams);
+
+        [DllImport(@"c:\My Programming\.Net\KZ_Ingenico_EPI\Supply folder\trgui.dll", CallingConvention = CallingConvention.Cdecl)]
+        public static extern int ScreenClose();
         #endregion
     }
 
@@ -117,12 +144,14 @@ namespace KZ_IgenicoApp
         //ScreenParams screen;
         //string responseString = "";
         //string receiptString = "";
-        public int TRGUI_ScreenShow(ref ScreenParams _screen)
+        public int ScreenShow(ScreenParams _screen)
         {
-            return 0;
+            IntPtr sPar = Marshal.AllocHGlobal(10000);
+            Marshal.StructureToPtr(_screen, sPar, false);
+            return TRposXNative.ScreenShow(sPar);
         }
 
-        public int TRGUI_ScreenClose()
+        public int ScreenClose()
         {
             return 0;
         }
@@ -131,8 +160,11 @@ namespace KZ_IgenicoApp
 
         public int Init()
         {
+            ScreenShowDelegate ssd = new ScreenShowDelegate(ScreenShow);
+            ScreenCloseDelegate scd = new ScreenCloseDelegate(ScreenClose);
+            
             string configPath = @"c:\My Programming\.Net\KZ_Ingenico_EPI\Supply folder\setup.txt";
-            return TRposXNative.TRPOSX_Init(configPath, TRGUI_ScreenShow, TRGUI_ScreenClose);
+            return TRposXNative.TRPOSX_Init(configPath, ssd, scd);
         }
 
         public int Close()
@@ -148,10 +180,9 @@ namespace KZ_IgenicoApp
             inParams.MessageID = "PUR";
             inParams.TransactionAmount = amount;
             inParams.ECRReceiptNumber = ECRReceipt;
-            //inParamsStr = "MessageID="+inParams.MessageID + '\n' + "ECRnumber="+inParams.ECRnumber + '\n' + "ECRReceiptNumber="+inParams.ECRReceiptNumber.ToString() + '\n' + "TransactionAmount="+inParams.TransactionAmount.ToString()+ '\n';
-            inParamsStr = $"MessageID={inParams.MessageID}{Environment.NewLine}ECRnumber={inParams.ECRnumber}{Environment.NewLine}ECRReceiptNumber={inParams.ECRReceiptNumber.ToString()}{Environment.NewLine}TransactionAmount={inParams.TransactionAmount.ToString()}{Environment.NewLine}";
-            int error = TRposXNative.TRPOSX_Proc(inParamsStr, out int outLen, out int lenReceipt);
-            if(error==0)
+            inParamsStr = $"MessageID={inParams.MessageID}{Environment.NewLine}ECRnumber={inParams.ECRnumber}{Environment.NewLine}ECRReceiptNumber={inParams.ECRReceiptNumber.ToString()}{Environment.NewLine}TransactionAmount={inParams.TransactionAmount.ToString()}{Environment.NewLine}";            
+            int error = TRposXNative.TRPOSX_Proc(inParamsStr, out int outLen, out int lenReceipt);;
+            if (error == 0)
             {
                 IntPtr bufferResponse = Marshal.AllocHGlobal(outLen);
                 IntPtr bufferReceipt = Marshal.AllocHGlobal(lenReceipt);
@@ -202,9 +233,9 @@ namespace KZ_IgenicoApp
             string inParamsStr;
             InputParams inParams = new InputParams();
             inParams.ECRnumber = "01";
-            inParams.MessageID = "SRV";
+            inParams.MessageID = "PNG";
             inParams.SRVSubfunction = 2;
-            inParamsStr = $"MessageID={inParams.MessageID}{Environment.NewLine}ECRnumber={inParams.ECRnumber}{Environment.NewLine}SRVsubfunction={inParams.SRVSubfunction}{Environment.NewLine}";
+            inParamsStr = $"MessageID={inParams.MessageID}{Environment.NewLine}ECRnumber={inParams.ECRnumber}{Environment.NewLine}";//SRVsubfunction={inParams.SRVSubfunction}{Environment.NewLine}";
             int error = TRposXNative.TRPOSX_Proc(inParamsStr, out int outLen, out int lenReceipt);
             return error;
         }
@@ -212,6 +243,19 @@ namespace KZ_IgenicoApp
         public int GetResponse()
         {
             return 0;
+        }
+
+        public int Cancel()
+        {
+            string inParamsStr;
+            InputParams inParams = new InputParams();
+            inParams.ECRnumber = "01";
+            inParams.MessageID = "VOI";
+            inParams.ECRReceiptNumber = ECRReceipt;
+            //inParamsStr = "MessageID="+inParams.MessageID + '\n' + "ECRnumber="+inParams.ECRnumber + '\n' + "ECRReceiptNumber="+inParams.ECRReceiptNumber.ToString() + '\n' + "TransactionAmount="+inParams.TransactionAmount.ToString()+ '\n';
+            inParamsStr = $"MessageID={inParams.MessageID}{Environment.NewLine}ECRnumber={inParams.ECRnumber}{Environment.NewLine}ECRReceiptNumber={inParams.ECRReceiptNumber.ToString()}{Environment.NewLine}";
+            int error = TRposXNative.TRPOSX_Proc(inParamsStr, out int outLen, out int lenReceipt);
+            return error;
         }
     }
 }
