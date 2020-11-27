@@ -9,7 +9,7 @@ namespace KZ_Ingenico_EPI
     public delegate int ScreenShowDelegate(ScreenParams pScreenParams);
     public delegate int ScreenCloseDelegate();
 
-    [StructLayout(LayoutKind.Sequential, CharSet = CharSet.Auto)]
+    [StructLayout(LayoutKind.Sequential)]
     public class ScreenParams
     {
         public Int32 len; // [in]
@@ -30,46 +30,39 @@ namespace KZ_Ingenico_EPI
         public void Print()
         {
             LoggerPermanent log = new LoggerPermanent("ScreenShow", "01");
-            IntPtr bufferResponse = Marshal.AllocHGlobal(20);
-            bufferResponse = this.pTitle;
-            char[] charBuff = new char[20];
-            Marshal.Copy(bufferResponse,charBuff, 0, charBuff.Length);
-            string title = Marshal.PtrToStringAuto(this.pTitle);
+            log.Write($"New---------------");
+            StringBuilder title = new StringBuilder();
+            if (this.pTitle.ToInt32() != 0)
+            {
+                TRposXNative.OemToChar(this.pTitle, title);
+            }
             List<string> str = new List<string>();
             if (this.pStr != null)
             {
                 foreach (IntPtr s in this.pStr)
                 {
-                    if (s != null)
+                    if (s.ToInt32()!=0)
                     {
-                        str.Add(Marshal.PtrToStringAuto(s));
+                        log.Write($"IntPtr: {s.ToInt32()}");
+                        StringBuilder strOem = new StringBuilder();
+                        TRposXNative.OemToChar(s, strOem);
+                        str.Add(strOem.ToString());
                     }
                 }
             }
-            log.Write($"New---------------");
-            if (!String.IsNullOrEmpty(title))
+            
+            if (!String.IsNullOrEmpty(title.ToString()))
             {
-                log.Write($"Title:{title}");
-                log.Write($"Title:{ConvertString(title)}");
+                log.Write($"Title:{title.ToString()}");
             }
             foreach (string s in str)
             {
                 if (!String.IsNullOrEmpty(s))
                 {
-                    log.Write($"String:{ConvertString(s)}");
+                    log.Write($"String:{s}");
                 }
             }
             log.Close();
-        }
-
-        private static string ConvertString(string inLine)
-        {
-            Encoding WINDOWS1251 = Encoding.GetEncoding(1251);
-            Encoding UTF8 = Encoding.UTF8;
-            Encoding ASCII = Encoding.ASCII;
-
-            string outStr = WINDOWS1251.GetString(ASCII.GetBytes(inLine));
-            return outStr;
         }
     };
 
