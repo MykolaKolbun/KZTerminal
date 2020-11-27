@@ -7,7 +7,8 @@ using System.Windows.Forms;
 namespace KZ_Ingenico_EPI
 {
     public delegate int ScreenShowDelegate(ScreenParams pScreenParams);
-    public delegate int ScreenCloseDelegate();
+    //public delegate int ScreenShowDelegate(IntPtr pScreenParams);
+    public delegate void ScreenCloseDelegate();
 
     [StructLayout(LayoutKind.Sequential)]
     public class ScreenParams
@@ -50,7 +51,8 @@ namespace KZ_Ingenico_EPI
                     }
                 }
             }
-            
+            log.Write($"ScreenID: {this.screenID}");
+            log.Write($"Format: {this.format}");
             if (!String.IsNullOrEmpty(title.ToString()))
             {
                 log.Write($"Title:{title.ToString()}");
@@ -150,7 +152,8 @@ namespace KZ_Ingenico_EPI
     {
         #region Fields
         public Response resp;
-        
+        private static bool screenShow=false;
+
         #endregion
 
         public int ScreenShow(ScreenParams _screen)
@@ -161,9 +164,61 @@ namespace KZ_Ingenico_EPI
             return TRposXNative.ScreenShow(sPar);
         }
 
-        public int ScreenClose()
+        public int ScreenShow(IntPtr _screen)
         {
+            screenShow = false;
+            ScreenParams screenParams = new ScreenParams();
+            Marshal.PtrToStructure(_screen, screenParams);
+            screenParams.Print();
+            switch (screenParams.screenID)
+            {
+                case 0:
+                    StringBuilder title = new StringBuilder();
+                    if (screenParams.pTitle.ToInt32() != 0)
+                    {
+                        TRposXNative.OemToChar(screenParams.pTitle, title);
+                    }
+                    string message = "";
+                    if (screenParams.pStr != null)
+                    {
+                        foreach (IntPtr s in screenParams.pStr)
+                        {
+                            if (s.ToInt32() != 0)
+                            {
+                                StringBuilder strOem = new StringBuilder();
+                                TRposXNative.OemToChar(s, strOem);
+                                message += strOem.ToString();
+                                message += Environment.NewLine;
+                            }
+                        }
+                    }
+                    break;
+                case 1:
+                    break;
+                case 2:
+                    break;
+                case 3:
+                    break;
+                case 4:
+                    break;
+                case 5:
+                    break;
+            }
+            while(screenShow)
+            { }
+            if(screenParams.screenID==0)
+            {
+                screenParams.eventKey = 0;
+            }
+            IntPtr sPar = Marshal.AllocHGlobal(92);
+            Marshal.StructureToPtr(screenParams, _screen, false);
+            
             return 0;
+        }
+
+        public void ScreenClose()
+        {
+            screenShow = true;
         }
 
         int ECRReceipt = 1000000070;
