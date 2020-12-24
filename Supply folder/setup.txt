@@ -13,9 +13,9 @@ IP=127.0.0.1
 Port=16500
 POSport=20500
 
-T1=3
-T1repeat=3
-T2=120
+T1=2
+T1repeat=2
+T2=90
 Tici=300
 Timeout=60
 Treg=5

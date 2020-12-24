@@ -25,7 +25,7 @@ namespace KZ_Ingenico_EPI
         private string _userId = String.Empty;
         private string _userName = String.Empty;
         private string _shiftId = String.Empty;
-        private bool isTerminalReady = true;
+        private bool isTerminalReady = false;
         private bool _activated = false;
         private bool _inTransaction = false;
         bool transactionCanceled = false;
@@ -64,7 +64,7 @@ namespace KZ_Ingenico_EPI
         /// </summary>
         public void Dispose()
         {
-            reader.Close();
+            //reader.Close();
             this.Dispose(true);
             GC.SuppressFinalize(this);
         }
@@ -174,6 +174,7 @@ namespace KZ_Ingenico_EPI
 
         public TransactionResult Debit(TransactionData debitData)
         {
+
             _inTransaction = true;
             transactionCanceled = false;
             transactionDataContainer = debitData;
@@ -183,102 +184,117 @@ namespace KZ_Ingenico_EPI
             log.Write($"Debit(Amount: {debitData.Amount}, RefID: {debitData.ReferenceId})");
             SQLConnect sql = new SQLConnect();
             Card card = Card.NoCard;
-            if (sql.IsSQLOnline())
+            if (isTerminalReady)
             {
-                try
+                if (sql.IsSQLOnline())
                 {
-                    int error = reader.Purchase((int)debitData.Amount, debitData.ReferenceId, terminalID);
-                    if (error == 0)
+                    try
                     {
-                        if (reader.resp.ResponseCode == 0 && reader.resp.ResponseCode != null)
+                        TrposXLib.Notify += TrposXLib_Notify;
+                        int error = reader.Purchase((int)(debitData.Amount*100), debitData.ReferenceId, terminalID);
+                        if (error == 0)
                         {
-                            OnAction(new ActionEventArgs(reader.resp.VisualHostResponse, ActionType.DisplayCustomerMessage));
-                            log.Write($"Authorization Process: {reader.resp.VisualHostResponse}");
-                            transactionResultDone = true;
+                            if (reader.resp.ResponseCode == 0 && reader.resp.ResponseCode != null)
+                            {
+                                OnAction(new ActionEventArgs(reader.resp.VisualHostResponse, ActionType.DisplayCustomerMessage));
+                                log.Write($"Authorization Process: {reader.resp.VisualHostResponse}");
+                                transactionResultDone = true;
 
-                        }
-                        else
-                        {
-                            OnAction(new ActionEventArgs(reader.resp.VisualHostResponse, ActionType.DisplayCustomerMessage));
-                            log.Write($"Authorization Process: {reader.resp.VisualHostResponse}");
+                            }
+                            else
+                            {
+                                OnAction(new ActionEventArgs(reader.resp.VisualHostResponse, ActionType.DisplayCustomerMessage));
+                                log.Write($"Authorization Process: {reader.resp.VisualHostResponse}");
+                            }
                         }
                     }
-                }
-                catch (Exception e)
-                {
-                    log.Write("Debit Exception: " + e.Message);
-                    _inTransaction = false;
-                    OnTrace(TraceLevel.Error, "EPI Exception:" + e.Message);
-                    lastTransaction = new TransactionFailedResult(TransactionType.Debit, DateTime.Now);
-                }
-                finally
-                {
-                    log.Write("Finaly");
-                    log.Write($"Transaction Done: {transactionResultDone}");
-                    if (transactionResultDone)
+                    catch (Exception e)
                     {
-                        if (debitData is ParkingTransactionData parkingTransactionData)
-                        {
-                            card = new CreditCard(reader.resp.PAN, reader.resp.ExpDate, new CardIssuer(reader.resp.IssuerName));
-
-                            log.Write($"Finaly RefID:{parkingTransactionData.ReferenceId}, Ticket: {parkingTransactionData.TicketId}, Amount: {(int)parkingTransactionData.Amount}, CardNR(PAN): {card.Number} \nReceipt: \n{reader.resp.Slip}");
-                            sql.AddLinePurch(this.deviceID, parkingTransactionData.ReferenceId, parkingTransactionData.TicketId, reader.resp.Slip, (int)parkingTransactionData.Amount, card.Number);
-                            TransactionDoneResult doneResult = new TransactionDoneResult(TransactionType.Debit, DateTime.Now);
-                            doneResult.ReceiptPrintoutMandatory = false;
-                            doneResult.Receipts = new Receipts(new Receipt(reader.resp.Receipt), new Receipt(reader.resp.Slip));
-                            doneResult.Amount = (int)parkingTransactionData.Amount;
-                            doneResult.Card = card;
-                            doneResult.AuthorizationNumber = reader.resp.AuthorizationID;
-                            doneResult.TransactionNumber = reader.resp.RRN;
-                            doneResult.CustomerDisplayText = reader.resp.VisualHostResponse;
-                            lastTransaction = doneResult;
-                            OnAction(new ActionEventArgs(lastTransaction.CustomerDisplayText, ActionType.DisplayCustomerMessage));
-                        }
-                        else
-                        {
-                            card = new CreditCard(reader.resp.PAN, reader.resp.ExpDate, new CardIssuer(reader.resp.IssuerName));
-
-                            log.Write($"Finaly RefID:{debitData.ReferenceId}, Amount: {(int)debitData.Amount}, CardNR(PAN): {card.Number} \n\tReceipt: \n\t{reader.resp.Slip}");
-                            sql.AddLinePurch(this.deviceID, debitData.ReferenceId, "", reader.resp.Slip, (int)debitData.Amount, card.Number);
-                            TransactionDoneResult doneResult = new TransactionDoneResult(TransactionType.Debit, DateTime.Now);
-                            doneResult.ReceiptPrintoutMandatory = false;
-                            doneResult.Receipts = new Receipts(new Receipt(reader.resp.Receipt), new Receipt(reader.resp.Slip));
-                            doneResult.Amount = (int)debitData.Amount;
-                            doneResult.Card = card;
-                            doneResult.AuthorizationNumber = reader.resp.AuthorizationID;
-                            doneResult.TransactionNumber = reader.resp.RRN;
-                            doneResult.CustomerDisplayText = reader.resp.VisualHostResponse;
-                            lastTransaction = doneResult;
-                            OnAction(new ActionEventArgs(lastTransaction.CustomerDisplayText, ActionType.DisplayCustomerMessage));
-                        }
-                        CountTransaction counter = new CountTransaction(this.deviceID);                        
-                        int tr = counter.Get();
-                        if (tr < 5)
-                        {
-                            ManualSettelment();
-                        }
-                        else
-                        {
-                            counter.Send(tr--);
-                        }
-                    }
-                    else
-                    {
-                        log.Write($"Finaly RefID:{debitData.ReferenceId}, \nReceipt: \n{reader.resp.Receipt}, \nAmount: {(int)debitData.Amount} ");
+                        log.Write("Debit Exception: " + e.Message);
+                        _inTransaction = false;
+                        OnTrace(TraceLevel.Error, "EPI Exception:" + e.Message);
                         lastTransaction = new TransactionFailedResult(TransactionType.Debit, DateTime.Now);
-                        lastTransaction.CustomerDisplayText = String.IsNullOrEmpty(reader.resp.VisualHostResponse) ? reader.resp.VisualHostResponse : "Ошибка!";
-                        lastTransaction.Receipts = new Receipts(new Receipt(reader.resp.Receipt));
-                        OnAction(new ActionEventArgs(lastTransaction.CustomerDisplayText, ActionType.DisplayCustomerMessage));
                     }
+                    finally
+                    {
+                        log.Write("Finaly");
+                        log.Write($"Transaction Done: {transactionResultDone}");
+                        TrposXLib.Notify -= TrposXLib_Notify;
+                        if (transactionResultDone)
+                        {
+                            if (debitData is ParkingTransactionData parkingTransactionData)
+                            {
+                                card = new CreditCard(reader.resp.PAN, reader.resp.ExpDate, new CardIssuer(reader.resp.IssuerName));
+                                log.Write($"Finaly RefID:{parkingTransactionData.ReferenceId}, Ticket: {parkingTransactionData.TicketId}, Amount: {(int)parkingTransactionData.Amount}, CardNR(PAN): {card.Number} \nReceipt: \n{reader.resp.Slip}");
+                                sql.AddLinePurch(this.deviceID, parkingTransactionData.ReferenceId, parkingTransactionData.TicketId, reader.resp.Slip, (int)parkingTransactionData.Amount, card.Number);
+                                TransactionDoneResult doneResult = new TransactionDoneResult(TransactionType.Debit, DateTime.Now);
+                                doneResult.ReceiptPrintoutMandatory = false;
+                                doneResult.Receipts = new Receipts(new Receipt(reader.resp.Receipt), new Receipt(reader.resp.Slip));
+                                doneResult.Amount = (int)parkingTransactionData.Amount;
+                                doneResult.Card = card;
+                                doneResult.AuthorizationNumber = reader.resp.AuthorizationID;
+                                doneResult.TransactionNumber = reader.resp.RRN;
+                                doneResult.CustomerDisplayText = reader.resp.VisualHostResponse;
+                                lastTransaction = doneResult;
+                                OnAction(new ActionEventArgs(lastTransaction.CustomerDisplayText, ActionType.DisplayCustomerMessage));
+                            }
+                            else
+                            {
+                                card = new CreditCard(reader.resp.PAN, reader.resp.ExpDate, new CardIssuer(reader.resp.IssuerName));
+                                log.Write($"Finaly RefID:{debitData.ReferenceId}, Amount: {(int)debitData.Amount}, CardNR(PAN): {card.Number} \n\tReceipt: \n\t{reader.resp.Slip}");
+                                sql.AddLinePurch(this.deviceID, debitData.ReferenceId, "", reader.resp.Slip, (int)debitData.Amount, card.Number);
+                                TransactionDoneResult doneResult = new TransactionDoneResult(TransactionType.Debit, DateTime.Now);
+                                doneResult.ReceiptPrintoutMandatory = false;
+                                doneResult.Receipts = new Receipts(new Receipt(reader.resp.Receipt), new Receipt(reader.resp.Slip));
+                                doneResult.Amount = (int)debitData.Amount;
+                                doneResult.Card = card;
+                                doneResult.AuthorizationNumber = reader.resp.AuthorizationID;
+                                doneResult.TransactionNumber = reader.resp.RRN;
+                                doneResult.CustomerDisplayText = reader.resp.VisualHostResponse;
+                                lastTransaction = doneResult;
+                                OnAction(new ActionEventArgs(lastTransaction.CustomerDisplayText, ActionType.DisplayCustomerMessage));
+                            }
+                            CountTransaction counter = new CountTransaction(this.deviceID);
+                            int tr = counter.Get();
+                            if (tr < 5)
+                            {
+                                ManualSettelment();
+                            }
+                            else
+                            {
+                                counter.Send(tr--);
+                            }
+                        }
+                        else
+                        {
+                            log.Write($"Finaly RefID:{debitData.ReferenceId}, \nReceipt: \n{reader.resp.Receipt}, \nAmount: {(int)debitData.Amount} ");
+                            lastTransaction = new TransactionFailedResult(TransactionType.Debit, DateTime.Now);
+                            lastTransaction.CustomerDisplayText = String.IsNullOrEmpty(reader.resp.VisualHostResponse) ? reader.resp.VisualHostResponse : "Ошибка!";
+                            lastTransaction.Receipts = new Receipts(new Receipt(reader.resp.Receipt));
+                            OnAction(new ActionEventArgs(lastTransaction.CustomerDisplayText, ActionType.DisplayCustomerMessage));
+                        }
+                    }
+                }
+                else
+                {
+                    log.Write($"No connection to SQL. RefID:{debitData.ReferenceId}");
+                    lastTransaction = new TransactionFailedResult(TransactionType.Debit, DateTime.Now);
+                    OnTrace(TraceLevel.Error, $"No connection to SQL. RefID:{debitData.ReferenceId}");
                 }
             }
             else
             {
-                log.Write($"No connection to SQL. RefID:{debitData.ReferenceId}");
+                log.Write($"Terminal not ready. RefID:{debitData.ReferenceId}");
                 lastTransaction = new TransactionFailedResult(TransactionType.Debit, DateTime.Now);
-                OnTrace(TraceLevel.Error, $"No connection to SQL. RefID:{debitData.ReferenceId}");
+                OnTrace(TraceLevel.Error, $"Terminal not ready. RefID:{debitData.ReferenceId}");
             }
+            
             return lastTransaction;
+        }
+
+        private void TrposXLib_Notify(string message)
+        {
+            OnAction(new ActionEventArgs(message, ActionType.DisplayCustomerMessage));
         }
 
         public TransactionResult Debit(TransactionData debitData, Card card)
@@ -316,6 +332,7 @@ namespace KZ_Ingenico_EPI
         public void Cancel()
         {
             Logger log = new Logger(this.ShortName, this.deviceID);
+            reader.Cancel();
             log.Write("Cancel()");
         }
 

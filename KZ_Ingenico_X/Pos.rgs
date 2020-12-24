@@ -1,0 +1,26 @@
+HKCR
+{
+	Pos.Terminal.1 = s 'Pos class'
+	{
+		CLSID = s '{0028f797-1947-4d02-a6e1-b333cf020b92}'
+	}
+	Pos.Terminal = s 'Pos class'
+	{		
+		CurVer = s 'Pos.Terminal.1'
+	}
+	NoRemove CLSID
+	{
+		ForceRemove {0028f797-1947-4d02-a6e1-b333cf020b92} = s 'Pos class'
+		{
+			ProgID = s 'Pos.Terminal.1'
+			VersionIndependentProgID = s 'Pos.Terminal'
+			ForceRemove Programmable
+			InprocServer32 = s '%MODULE%'
+			{
+				val ThreadingModel = s 'Apartment'
+			}
+			TypeLib = s '{d89963cf-7444-4cd6-9eca-a73ba6c0e613}'
+			Version = s '1.0'
+		}
+	}
+}

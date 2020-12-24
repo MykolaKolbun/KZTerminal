@@ -1,0 +1,56 @@
+// KZ_Ingenico_X.idl : IDL source for KZ_Ingenico_X
+//
+
+// This file will be processed by the MIDL tool to
+// produce the type library (KZIngenicoX.tlb) and marshalling code.
+
+import "oaidl.idl";
+import "ocidl.idl";
+
+[
+	object,
+	uuid(24b456e7-3c05-4792-831e-7ddd4b139d8f),
+	dual,
+	nonextensible,
+	pointer_default(unique)
+]
+interface IPos : IDispatch
+{
+	/*[id(1)] HRESULT Add([in] DOUBLE a, [in] DOUBLE b, [out] DOUBLE* res);
+	[id(2)] HRESULT Connect1([out, retval] BYTE* result);*/
+	[id(3)] HRESULT Initialize([in] BSTR dllPath, [in] BSTR setupPath, [out, retval] BYTE* result);
+	[id(4)] HRESULT StartPurchase([in] DOUBLE amount, [in] BSTR ECRNr, [in] BSTR TRNr, [out, retval] BYTE* result);
+	[id(18)] HRESULT GetResponce();
+	[propget, id(5)] HRESULT lastError([out, retval] LONG* pVal);
+	[propget, id(6)] HRESULT LastStatMsgCode([out, retval] LONG* pVal);
+	[propget, id(7)] HRESULT LastStatMsgDescription([out, retval] BSTR* pVal);
+	[propget, id(8)] HRESULT ResponseCode([out, retval] LONG* pVal);
+	[propget, id(9)] HRESULT LastErrorCode([out, retval] LONG* pVal);
+	[propget, id(10)] HRESULT PAN([out, retval] BSTR* pVal);
+	[propget, id(11)] HRESULT ExpDate([out, retval] BSTR* pVal);
+	[propget, id(12)] HRESULT IssuerName([out, retval] BSTR* pVal);
+	[propget, id(13)] HRESULT AuthCode([out, retval] BSTR* pVal);
+	[propget, id(14)] HRESULT RRN([out, retval] BSTR* pVal);
+	[propget, id(15)] HRESULT LastErrorDescription([out, retval] BSTR* pVal);
+	[propget, id(16)] HRESULT Receipt([out, retval] BSTR* pVal);
+	[propget, id(17)] HRESULT Amount([out, retval] LONG* pVal);
+	
+	[propget, id(19)] HRESULT outString([out, retval] BSTR* pVal);
+};
+[
+	uuid(d89963cf-7444-4cd6-9eca-a73ba6c0e613),
+	version(1.0),
+]
+library KZIngenicoXLib
+{
+	importlib("stdole2.tlb");
+	[
+		uuid(0028f797-1947-4d02-a6e1-b333cf020b92)
+	]
+	coclass Pos
+	{
+		[default] interface IPos;
+	};
+};
+
+import "shobjidl.idl";
