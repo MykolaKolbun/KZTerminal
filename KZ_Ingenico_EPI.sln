@@ -5,11 +5,13 @@ VisualStudioVersion = 16.0.29609.76
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "KZ_Ingenico_EPI", "KZ_Ingenico_EPI\KZ_Ingenico_EPI.csproj", "{988755EE-41AD-4FEC-A791-006E656CC94D}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "KZ_IgenicoApp",  "KZ_IgenicoApp\KZ_IgenicoApp.csproj", "{07B244B2-81EE-4278-B0D3-F50DC41B95FE}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "KZ_IgenicoApp", "KZ_IgenicoApp\KZ_IgenicoApp.csproj", "{07B244B2-81EE-4278-B0D3-F50DC41B95FE}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "KZ_Console_App", "KZ_Console_App\KZ_Console_App.vcxproj", "{12052CAF-E022-4D5E-AF1D-AA5F714F4DD3}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "KZ_Ingenico_X",  "KZ_Ingenico_X\KZ_Ingenico_X.vcxproj", "{88F1EF71-C8EA-4F4E-A310-9B4BB334C56B}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "KZ_Ingenico_X", "KZ_Ingenico_X\KZ_Ingenico_X.vcxproj", "{88F1EF71-C8EA-4F4E-A310-9B4BB334C56B}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ConsoleTests", "ConsoleTests\ConsoleTests.vcxproj", "{EE076406-847D-4DDC-8A31-5429D10F8476}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -67,6 +69,16 @@ Global
 		{88F1EF71-C8EA-4F4E-A310-9B4BB334C56B}.Release|x64.Build.0 = Release|x64
 		{88F1EF71-C8EA-4F4E-A310-9B4BB334C56B}.Release|x86.ActiveCfg = Release|Win32
 		{88F1EF71-C8EA-4F4E-A310-9B4BB334C56B}.Release|x86.Build.0 = Release|Win32
+		{EE076406-847D-4DDC-8A31-5429D10F8476}.Debug|Any CPU.ActiveCfg = Debug|Win32
+		{EE076406-847D-4DDC-8A31-5429D10F8476}.Debug|x64.ActiveCfg = Debug|x64
+		{EE076406-847D-4DDC-8A31-5429D10F8476}.Debug|x64.Build.0 = Debug|x64
+		{EE076406-847D-4DDC-8A31-5429D10F8476}.Debug|x86.ActiveCfg = Debug|Win32
+		{EE076406-847D-4DDC-8A31-5429D10F8476}.Debug|x86.Build.0 = Debug|Win32
+		{EE076406-847D-4DDC-8A31-5429D10F8476}.Release|Any CPU.ActiveCfg = Release|Win32
+		{EE076406-847D-4DDC-8A31-5429D10F8476}.Release|x64.ActiveCfg = Release|x64
+		{EE076406-847D-4DDC-8A31-5429D10F8476}.Release|x64.Build.0 = Release|x64
+		{EE076406-847D-4DDC-8A31-5429D10F8476}.Release|x86.ActiveCfg = Release|Win32
+		{EE076406-847D-4DDC-8A31-5429D10F8476}.Release|x86.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
