@@ -196,7 +196,7 @@ void CPos::Purchase(HINSTANCE instance, string ECRNumber, string transactionNumb
     string _4 = "\nECRReceiptNumber=";
     string _5 = transactionNumber;
     string _6 = "\nTransactionAmount=";
-    string _7 = to_string(amount * 100);
+    string _7 = to_string(amount);
     string _8 = "\n";
     inParamsStr = _1 + _2 + _3 + _4 + _5 + _6 + _7 + _8;
     int lenOut, lenReceipt = 0;

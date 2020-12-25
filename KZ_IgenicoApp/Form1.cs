@@ -15,7 +15,6 @@ namespace KZ_IgenicoApp
     public partial class Form1 : Form
     {
         IPos pos1;
-        TrposiXLib pos;
 
         [DllImport("user32.dll")]
         static public extern bool OemToCharA(char[] lpszSrc, [Out] StringBuilder lpszDst);
@@ -25,7 +24,6 @@ namespace KZ_IgenicoApp
         public Form1()
         {
             InitializeComponent();
-            pos = new TrposiXLib();
             pos1 = new Pos();
 
         }
