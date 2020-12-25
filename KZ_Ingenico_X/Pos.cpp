@@ -32,7 +32,7 @@ static int _ScreenShow(ScreenParams* pScreenParams)
         if (pScreenParams->pStr[i] != NULL)
         {
 
-            this_thread::sleep_for(std::chrono::milliseconds(150));
+            //this_thread::sleep_for(std::chrono::milliseconds(250));
             _LastStatMsgDescription = pScreenParams->pStr[i];
             _LastStatMsgDescription += "\n";
             _LastStatMsgCode++;
@@ -48,6 +48,25 @@ static int _ScreenShow(ScreenParams* pScreenParams)
 static void _ScreenClose()
 {
     //ScreenClose();
+}
+
+static void SetDefaults()
+{
+    response.APPROVE = "N";
+    response.AUTHNR = "";
+    response.DATE = "";
+    response.EXP = "";
+    response.INVOICENR = "";
+    response.ISSUER = "";
+    response.PAN = "";
+    response.RESPONSECODE = "FF";
+    response.RRN = "";
+    response.TIME = "";
+    response.VISUALHOSTRESPONCE = "";
+    receipt = "";
+    slip = "";
+    _LastStatMsgDescription = "";
+    _LastErrorDescription = "";
 }
 
 static vector<string> ParseString(const string &inString, char delimiter)
@@ -95,49 +114,50 @@ static vector<string> ParseStringA(const string& inString, char delimiter)
 static void SetResponse(string str)
 {
     vector<string> vt = ParseStringA(str, '=');
-    if (vt[0].compare("ResponseCode") != 0)
+    if (vt[0] == "ResponseCode")
     {
         response.RESPONSECODE = vt[1];
     }
-    if (vt[0].compare("Approve") != 0)
+    if (vt[0] == "Approve")
     {
         response.APPROVE = vt[1];
     }
-    if (vt[0].compare("AUTHNR") != 0)
+    if (vt[0] == "AUTHNR")
     {
         response.AUTHNR = vt[1];
     }
-    if (vt[0].compare("DATE") != 0)
+    if (vt[0] == "DATE")
     {
         response.DATE = vt[1];
     }
-    if (vt[0].compare("EXP") != 0)
+    if (vt[0] == "EXP")
     {
         response.EXP = vt[1];
     }
-    if (vt[0].compare("INVOICENR") != 0)
+    if (vt[0] == "INVOICENR")
     {
         response.INVOICENR = vt[1];
     }
-    if (vt[0].compare("ISSUER") != 0)
+    if (vt[0] == "ISSUER")
     {
         response.ISSUER = vt[1];
     }
-    if (vt[0].compare("PAN") != 0)
+    if (vt[0] == "PAN")
     {
         response.PAN = vt[1];
     }
-    if (vt[0].compare("RRN") != 0)
+    if (vt[0] == "RRN")
     {
         response.RRN = vt[1];
     }
-    if (vt[0].compare("TIME") != 0)
+    if (vt[0] == "TIME")
     {
         response.TIME = vt[1];
     }
-    if (vt[0].compare("VisualHostResponse") != 0)
+    if (vt[0] == "VisualHostResponse")
     {
         response.VISUALHOSTRESPONCE = vt[1];
+        _LastErrorDescription = vt[1];
     }
 }
 
@@ -166,6 +186,7 @@ HINSTANCE CPos::Connect(LPCWSTR dllPath, string setupPath)
 
 void CPos::Purchase(HINSTANCE instance, string ECRNumber, string transactionNumber, int amount)
 {
+    SetDefaults();
     string inParamsStr;
     char outParamsCh[1000];
     char receiptCh[2000];
@@ -231,7 +252,6 @@ BSTR str_to_bstr(string source)
 {
     return _com_util::ConvertStringToBSTR(source.c_str());
 }
-
 
 STDMETHODIMP CPos::StartPurchase(DOUBLE amount, BSTR ECRNr, BSTR TRNr, byte *result)
 {

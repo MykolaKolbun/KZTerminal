@@ -1,7 +1,7 @@
 MessageID=PUR
 ResponseCode=B5
 ECRnumber=01
-ECRReceiptNumber=1000002582
+ECRReceiptNumber=1000002586
 TransactionAmount=1200
 VisualHostResponse=Транзакция с таким номером существует
 Approve=N

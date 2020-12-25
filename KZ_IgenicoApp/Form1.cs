@@ -45,56 +45,52 @@ namespace KZ_IgenicoApp
 
         private void btnPurch_Click(object sender, EventArgs e)
         {
-            ASCIIEncoding ascii = new ASCIIEncoding();
-            UTF8Encoding utf8 = new UTF8Encoding();
             try
             {
-                int error = pos1.StartPurchase(12, "01", "1000002582");
+                int error = pos1.StartPurchase(12, "01", "1000002587");
                 int temp = 0;
                 while(pos1.lastError == 2)
                 {
                     if(temp != pos1.LastStatMsgCode)
                     {
                         StringBuilder outStr = new StringBuilder();
-                        OemToCharA(pos1.LastStatMsgDescription.ToArray(), outStr);
+                        OemToCharA((pos1.LastStatMsgDescription+'\0').ToArray(), outStr);
                         richTextBox1.AppendText(outStr.ToString());
                         temp = pos1.LastStatMsgCode;
                     }
                 }
                 if (pos1.lastError == 0)
                 {
-                    richTextBox1.AppendText(pos1.ResponseCode.ToString());
+                    if (pos1.ResponseCode == 0)
+                    {
+                        MessageBox.Show(pos1.Receipt);
+                    }
+                    else
+                    {
+                        MessageBox.Show(pos1.LastErrorDescription);
+                    }
                 }
+                
             }
             catch (Exception ex)
             {
-                pos.Close();
+                //pos.Close();
                 MessageBox.Show($"Exception: {ex.Message}");
             }
         }
 
         private void btnClose_Click(object sender, EventArgs e)
         {
-            pos.Close();
+            //pos.Close();
             this.Close();
         }
 
         private void btnSettlement_Click(object sender, EventArgs e)
-        {
-            try
-            {
-                MessageBox.Show($"Result: {pos.Service()}");
-            }
-            catch (Exception ex)
-            {
-                pos.Close();
-                MessageBox.Show($"Exception: {ex.Message}");
-            }
-        }
+        {}
 
         private void btnCancel_Click(object sender, EventArgs e)
         {
-            pos.Cancel();
+            //pos.Cancel();
         }
 
         private void button1_Click(object sender, EventArgs e)
@@ -108,7 +104,5 @@ namespace KZ_IgenicoApp
             //}
             //MessageBox.Show("b.ToString()");
         }
-
-        
     }
 }
