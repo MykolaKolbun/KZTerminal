@@ -45,7 +45,8 @@ namespace KZ_IgenicoApp
         {
             try
             {
-                int error = pos1.StartPurchase(12, "01", "1000002587");
+                //int error = pos1.StartPurchase(12, "01", "1000002587");
+                int error;
                 int temp = 0;
                 while(pos1.lastError == 2)
                 {

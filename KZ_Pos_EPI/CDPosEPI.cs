@@ -13,7 +13,7 @@ using System.Runtime.InteropServices;
 
 namespace KZ_Pos_EPI
 {
-    public class CDPosEPI : ITerminal2
+    public class CDPosEPI : ITerminal2, ICardHandling2
     {
         #region Fields
         private Settings _settings = new Settings();
@@ -29,7 +29,7 @@ namespace KZ_Pos_EPI
         private string _userId = String.Empty;
         private string _userName = String.Empty;
         private string _shiftId = String.Empty;
-        private bool isTerminalReady = false;
+        private bool isTerminalReady = true;
         private bool _activated = false;
         private bool _inTransaction = false;
         bool transactionCanceled = false;
@@ -37,8 +37,24 @@ namespace KZ_Pos_EPI
         IPos reader;
         #endregion
 
-        #region Constructor
 
+
+        #region Constructor
+        public CDPosEPI()
+        {
+            this._settings.AllowsCancel = false;
+            this._settings.AllowsCredit = true;
+            this._settings.AllowsRepeatReceipt = false;
+            this._settings.AllowsValidateCard = true;
+            this._settings.AllowsVoid = true;
+            this._settings.CanSetCardData = true;
+            this._settings.HasCardReader = true;
+            this._settings.IsContactless = false;
+            this._settings.MayPrintReceiptOnRejection = false;
+            this._settings.NeedsSkidataChipReader = false;
+            this._settings.RequireReceiptPrinter = false;
+            this._settings.PaymentCardMayDifferFromAccessCard = true;
+        }
         #endregion
 
         #region IDisposable members
@@ -86,12 +102,15 @@ namespace KZ_Pos_EPI
         #region ITerminal members
 
         public string Name => "IngenicoKZ.Terminal";
-        
-        Settings ITerminal.Settings 
-        {
+
+        Settings ITerminal.Settings {
+            get { return this.TerminalSettings; }
+        }
+
+        private Settings TerminalSettings {
             get { return this._settings; }
         }
-        
+
         public string ShortName => "KZ_Terminal";
 
         public bool BeginInstall(TerminalConfiguration configuration)
@@ -105,7 +124,8 @@ namespace KZ_Pos_EPI
             CreateFolders();
             Logger log = new Logger(this.ShortName, this.deviceID);
             log.Write("Begin Install");
-            int error = reader.Initialize($@"{StringValue.WorkingDirectory}\EPI\Supply folder\trgui.dll", $@"{StringValue.WorkingDirectory}\EPI\Supply folder\setup.txt");
+            log.Write($@"{ StringValue.WorkingDirectory}\EPI\Supply folder\trposx.dll, { StringValue.WorkingDirectory}\EPI\Supply folder\setup.txt");
+            int error = reader.Initialize($@"{StringValue.WorkingDirectory}\EPI\Supply folder\trposx.dll", $@"{StringValue.WorkingDirectory}\EPI\Supply folder\setup.txt");
             log.Write($"Begin Install: Init result: {error}");
             if (error == 0)
             {
@@ -156,12 +176,12 @@ namespace KZ_Pos_EPI
 
         public bool SupportsDebitCards()
         {
-            return false;
+            return true;
         }
 
         public bool SupportsElectronicPurseCards()
         {
-            return false;
+            return true;
         }
 
         public void AllowCards(CardIssuerCollection issuers)
@@ -171,6 +191,8 @@ namespace KZ_Pos_EPI
 
         public bool IsTerminalReady()
         {
+            Logger log = new Logger(this.ShortName, this.deviceID);
+            log.Write($"IsTerminalReady({isTerminalReady.ToString()})");
             return isTerminalReady;
         }
 
@@ -316,6 +338,9 @@ namespace KZ_Pos_EPI
         public event EventHandler TerminalReadyChanged;
         public event JournalizeEventHandler Journalize;
         public event TraceEventHandler Trace;
+        public event EventHandler CancelPressed;
+        public event EventHandler CardInserted;
+        public event EventHandler CardRemoved;
 
         private void OnAction(ActionEventArgs args)
         {
@@ -376,6 +401,24 @@ namespace KZ_Pos_EPI
             if (Trace != null)
                 Trace(this, new TraceEventArgs(String.Format(CultureInfo.InvariantCulture, format, args), level));
         }
+
+        private void OnCardInserted()
+        {
+            if (CardInserted != null)
+                CardInserted(this, new EventArgs());
+        }
+
+        private void OnCardRemoved()
+        {
+            if (CardRemoved != null)
+                CardRemoved(this, new EventArgs());
+        }
+
+        private void OnCancelPressed()
+        {
+            if (CancelPressed != null)
+                CancelPressed(this, new EventArgs());
+        }
         #endregion
 
         #region Custom methods
@@ -411,63 +454,132 @@ namespace KZ_Pos_EPI
 
         public TransactionResult Credit(TransactionData creditData)
         {
-            throw new NotImplementedException();
+            return Debit(creditData);
         }
 
         public TransactionResult Credit(TransactionData creditData, Card card)
         {
-            throw new NotImplementedException();
+            return Debit(creditData);
         }
 
         public TransactionResult Debit(TransactionData debitData, Card card)
         {
-            throw new NotImplementedException();
+            return Debit(debitData);
         }
 
         public void ExecuteCommand(int commandId)
         {
-            throw new NotImplementedException();
+            Logger log = new Logger(this.ShortName, this.deviceID);
+            log.Write($"Execute Command({commandId.ToString()})");
+            if (_activated == true)
+            {
+                switch (commandId)
+                {
+                    case 1001:
+                        OnAction(new ActionEventArgs("Нет реализации", ActionType.DisplayOperatorMessage)); ;
+                        break;
+                    default:
+                        break;
+                }
+            }
+            else
+            {
+                OnAction(new ActionEventArgs("Отмените операцию наличными! \n   (Нажмите отмена)", ActionType.DisplayCustomerMessage));
+            }
         }
 
         public void ExecuteCommand(int commandId, object parameterValue)
         {
-            throw new NotImplementedException();
+            Logger log = new Logger(this.ShortName, this.deviceID);
+            log.Write($"ExecuteCommand() command {commandId.ToString()}, parameterValue: {parameterValue.ToString()}");
         }
 
         public CommandDefinitionCollection GetCommands()
         {
-            throw new NotImplementedException();
+            CommandDefinitionCollection commandDefinitionCollection = new CommandDefinitionCollection();
+            CommandDefinition cardBtn = new CommandDefinition(1001, "Карта");
+            commandDefinitionCollection.Add(cardBtn);
+            return commandDefinitionCollection;
         }
 
         public TransactionResult GetLastTransaction()
         {
-            throw new NotImplementedException();
+            Logger log = new Logger(this.ShortName, this.deviceID);
+            log.Write("GetLastTransaction()");
+            if (lastTransaction == null)
+                lastTransaction = new TransactionFailedResult(TransactionType.Debit, DateTime.Now);
+            return lastTransaction;
         }
 
         public Card GetManualCard(Card card)
         {
-            throw new NotImplementedException();
+            return card;
         }
 
         public Card GetManualCard(Card card, string paymentType)
         {
-            throw new NotImplementedException();
+            return card;
         }
         
 
         public ValidationResult ValidateCard()
         {
-            throw new NotImplementedException();
+            Logger log = new Logger(this.ShortName, this.deviceID);
+            log.Write("ValidateCard()");
+            return new ValidationResult();
         }
 
         public ValidationResult ValidateCard(Card card)
         {
-            throw new NotImplementedException();
+            Logger log = new Logger(this.ShortName, this.deviceID);
+            log.Write($"ValidateCard(card) {card.Number}");
+            return new ValidationResult();
         }
 
         public TransactionResult Void(TransactionDoneResult debitResultData)
         {
-            throw new NotImplementedException();
+            return new TransactionFailedResult(debitResultData.TransactionType);
+        }
+
+        public void Activate(decimal amount)
+        {
+            Logger log = new Logger(this.ShortName, this.deviceID);
+            //_transactionCancelled = false;
+            _activated = true;
+            log.Write($"Activate({amount} грн)");
+            if (this.deviceType == DeviceType.PaymentCheckpoint)
+            {
+                if (false)
+                {
+                    log.Write(string.Format("Terminal blocked"));
+                    OnAction(new ActionEventArgs("Оплата тимчасово \nне можлива!", ActionType.DisplayCustomerMessage));
+                }
+                else
+                {
+                    OnCardInserted();
+                }
+            }
+        }
+
+        public void Deactivate()
+        {
+            Logger log = new Logger(this.ShortName, this.deviceID);
+            log.Write("Deactivate()");
+            _activated = false;
+            if (this.deviceType == DeviceType.PaymentCheckpoint)
+            {
+                //this.Cancel();
+                log.Write("Deactivate(Cancel)");
+                //_transactionCancelled = true;
+            }
+        }
+
+        public void ReleaseCard()
+        {
+            Logger log = new Logger(this.ShortName, this.deviceID);
+            log.Write("ReleaseCard()");
+            OnCardRemoved();
+            //this._activated = false;
         }
     }
 }

@@ -5,25 +5,6 @@
 #include <vector>
 // CPos
 
-//
-//
-//STDMETHODIMP CPos::Add(DOUBLE a, DOUBLE b, DOUBLE* res)
-//{
-//    //double _res = a + b;
-//    //*res = _res;
-//    /*posTerminal = Connect(L"C:\\My Programming\\.Net\\KZ_Ingenico_EPI\\Supply folder\\Trposx.dll", "c:\\My Programming\\.Net\\KZ_Ingenico_EPI\\Supply folder\\setup.txt");
-//    nr = 1000011112;
-//    state = State();
-//    double _result = (BYTE)posTerminal;
-//    *res = _result;*/
-//    return S_OK;
-//}
-//
-//
-//STDMETHODIMP CPos::Connect1(BYTE* result)
-//{
-//    return S_OK;
-//}
 
 static int _ScreenShow(ScreenParams* pScreenParams)
 {
@@ -35,7 +16,7 @@ static int _ScreenShow(ScreenParams* pScreenParams)
             //this_thread::sleep_for(std::chrono::milliseconds(250));
             _LastStatMsgDescription = pScreenParams->pStr[i];
             _LastStatMsgDescription += "\n";
-            _LastStatMsgCode++;
+            _LastStatMsgCode++; 
         }
     }
     if (pScreenParams->screenID == 3)
@@ -163,8 +144,7 @@ static void SetResponse(string str)
 
 HINSTANCE CPos::Connect(LPCWSTR dllPath, string setupPath)
 {
-    string temp = "trposx.dll";
-    HINSTANCE pos = LoadLibraryEx(L"c:\\My Programming\\.Net\\KZ_Ingenico_EPI\\Supply folder\\Trposx.dll", NULL, LOAD_WITH_ALTERED_SEARCH_PATH);
+    HINSTANCE pos = LoadLibraryEx(dllPath, NULL, LOAD_WITH_ALTERED_SEARCH_PATH);
 
     if (pos != 0)
     {
