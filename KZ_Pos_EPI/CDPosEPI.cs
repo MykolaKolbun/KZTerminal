@@ -3,13 +3,13 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
-using SkiData.ElectronicPayment;
-using SkiData.Parking.ElectronicPayment.Extensions;
 using KZIngenicoXLib;
 using System.Diagnostics;
 using System.IO;
 using System.Runtime.InteropServices;
+using SkiData.ElectronicPayment;
+using SkiData.Parking.ElectronicPayment.Extensions;
+using System.Threading;
 
 namespace KZ_Pos_EPI
 {
@@ -37,12 +37,10 @@ namespace KZ_Pos_EPI
         IPos reader;
         #endregion
 
-
-
         #region Constructor
         public CDPosEPI()
         {
-            this._settings.AllowsCancel = false;
+            this._settings.AllowsCancel = true;
             this._settings.AllowsCredit = true;
             this._settings.AllowsRepeatReceipt = false;
             this._settings.AllowsValidateCard = true;
@@ -53,7 +51,6 @@ namespace KZ_Pos_EPI
             this._settings.MayPrintReceiptOnRejection = false;
             this._settings.NeedsSkidataChipReader = false;
             this._settings.RequireReceiptPrinter = false;
-            this._settings.PaymentCardMayDifferFromAccessCard = true;
         }
         #endregion
 
@@ -66,7 +63,6 @@ namespace KZ_Pos_EPI
         /// </summary>
         public void Dispose()
         {
-            //reader.Close();
             this.Dispose(true);
             GC.SuppressFinalize(this);
         }
@@ -96,7 +92,6 @@ namespace KZ_Pos_EPI
         {
             this.Dispose(false);
         }
-
         #endregion
 
         #region ITerminal members
@@ -212,6 +207,8 @@ namespace KZ_Pos_EPI
             log.Write($"Debit(Amount: {debitData.Amount}, RefID: {debitData.ReferenceId})");
             SQLConnect sql = new SQLConnect();
             Card card = Card.NoCard;
+            ECRNumeration ECRNR = new ECRNumeration(this.deviceID);
+            int ECRNumber = ECRNR.Get();
             if (isTerminalReady)
             {
                 if (sql.IsSQLOnline())
@@ -219,7 +216,7 @@ namespace KZ_Pos_EPI
                     try
                     {
                         //TODO Change referenceID to string ECRNumber
-                        int error = reader.StartPurchase((int)(debitData.Amount * 100), terminalID, debitData.ReferenceId);
+                        int error = reader.StartPurchase((int)(debitData.Amount * 100), terminalID, ECRNumber.ToString());
                         int temp = 0;
                         while (reader.lastError == 2)
                         {
@@ -239,7 +236,7 @@ namespace KZ_Pos_EPI
                             }
                             else
                             {
-                                OnAction(new ActionEventArgs(reader.LastErrorDescription, ActionType.DisplayCustomerMessage));
+                                OnAction(new ActionEventArgs($"Response Code: {reader.ResponseCode}", ActionType.DisplayCustomerMessage));
                             }
                         }
                     }
@@ -288,6 +285,7 @@ namespace KZ_Pos_EPI
                                 lastTransaction = doneResult;
                                 OnAction(new ActionEventArgs(lastTransaction.CustomerDisplayText, ActionType.DisplayCustomerMessage));
                             }
+                            ECRNR.Add();
                             CountTransaction counter = new CountTransaction(this.deviceID);
                             int tr = counter.Get();
                             if (tr < 5)
@@ -325,6 +323,122 @@ namespace KZ_Pos_EPI
             return lastTransaction;
         }
 
+        public TransactionResult Credit(TransactionData creditData)
+        {
+            return Debit(creditData);
+        }
+
+        public TransactionResult Credit(TransactionData creditData, Card card)
+        {
+            return Debit(creditData);
+        }
+
+        public TransactionResult Debit(TransactionData debitData, Card card)
+        {
+            return Debit(debitData);
+        }
+
+        public void ExecuteCommand(int commandId)
+        {
+            Logger log = new Logger(this.ShortName, this.deviceID);
+            log.Write($"Execute Command({commandId.ToString()})");
+            if (_activated == true)
+            {
+                switch (commandId)
+                {
+                    case 1001:
+                        OnCardInserted();
+                        break;
+                    default:
+                        break;
+                }
+            }
+            else
+            {
+                OnAction(new ActionEventArgs("Отмените операцию наличными! \n   (Нажмите отмена)", ActionType.DisplayCustomerMessage));
+            }
+        }
+
+        public void ExecuteCommand(int commandId, object parameterValue)
+        {
+            Logger log = new Logger(this.ShortName, this.deviceID);
+            log.Write($"ExecuteCommand() command {commandId.ToString()}, parameterValue: {parameterValue.ToString()}");
+        }
+
+        public CommandDefinitionCollection GetCommands()
+        {
+            CommandDefinitionCollection commandDefinitionCollection = new CommandDefinitionCollection();
+            CommandDefinition cardBtn = new CommandDefinition(1001, "Карта");
+            commandDefinitionCollection.Add(cardBtn);
+            return commandDefinitionCollection;
+        }
+
+        public TransactionResult GetLastTransaction()
+        {
+            Logger log = new Logger(this.ShortName, this.deviceID);
+            log.Write("GetLastTransaction()");
+            if (lastTransaction == null)
+                lastTransaction = new TransactionFailedResult(TransactionType.Debit, DateTime.Now);
+            return lastTransaction;
+        }
+
+        public Card GetManualCard(Card card)
+        {
+            return card;
+        }
+
+        public Card GetManualCard(Card card, string paymentType)
+        {
+            return card;
+        }
+
+        public ValidationResult ValidateCard()
+        {
+            Logger log = new Logger(this.ShortName, this.deviceID);
+            log.Write("ValidateCard()");
+            return new ValidationResult();
+        }
+
+        public ValidationResult ValidateCard(Card card)
+        {
+            Logger log = new Logger(this.ShortName, this.deviceID);
+            log.Write($"ValidateCard(card) {card.Number}");
+            return new ValidationResult();
+        }
+
+        public TransactionResult Void(TransactionDoneResult debitResultData)
+        {
+            return new TransactionFailedResult(debitResultData.TransactionType);
+        }
+        #endregion
+
+        #region ICardHandling
+        public void Activate(decimal amount)
+        {
+            Logger log = new Logger(this.ShortName, this.deviceID);
+            //_transactionCancelled = false;
+            _activated = true;
+            log.Write($"Activate ({amount} грн)");
+            //if (amount != 0)
+            //{
+            //    OnCardInserted();
+            //}
+        }
+
+public void Deactivate()
+        {
+            Logger log = new Logger(this.ShortName, this.deviceID);
+            log.Write("Deactivate()");
+            _activated = false;
+        }
+
+        public void ReleaseCard()
+        {
+            Logger log = new Logger(this.ShortName, this.deviceID);
+            log.Write("ReleaseCard()");
+            OnCardRemoved();
+            _activated = false;
+        }
         #endregion
 
         #region Events
@@ -447,139 +561,10 @@ namespace KZ_Pos_EPI
 
         void ManualSettelment()
         {
-
+            ECRNumeration eCRNumeration = new ECRNumeration(this.deviceID);
+            eCRNumeration.Resert();
         }
 
         #endregion
-
-        public TransactionResult Credit(TransactionData creditData)
-        {
-            return Debit(creditData);
-        }
-
-        public TransactionResult Credit(TransactionData creditData, Card card)
-        {
-            return Debit(creditData);
-        }
-
-        public TransactionResult Debit(TransactionData debitData, Card card)
-        {
-            return Debit(debitData);
-        }
-
-        public void ExecuteCommand(int commandId)
-        {
-            Logger log = new Logger(this.ShortName, this.deviceID);
-            log.Write($"Execute Command({commandId.ToString()})");
-            if (_activated == true)
-            {
-                switch (commandId)
-                {
-                    case 1001:
-                        OnAction(new ActionEventArgs("Нет реализации", ActionType.DisplayOperatorMessage)); ;
-                        break;
-                    default:
-                        break;
-                }
-            }
-            else
-            {
-                OnAction(new ActionEventArgs("Отмените операцию наличными! \n   (Нажмите отмена)", ActionType.DisplayCustomerMessage));
-            }
-        }
-
-        public void ExecuteCommand(int commandId, object parameterValue)
-        {
-            Logger log = new Logger(this.ShortName, this.deviceID);
-            log.Write($"ExecuteCommand() command {commandId.ToString()}, parameterValue: {parameterValue.ToString()}");
-        }
-
-        public CommandDefinitionCollection GetCommands()
-        {
-            CommandDefinitionCollection commandDefinitionCollection = new CommandDefinitionCollection();
-            CommandDefinition cardBtn = new CommandDefinition(1001, "Карта");
-            commandDefinitionCollection.Add(cardBtn);
-            return commandDefinitionCollection;
-        }
-
-        public TransactionResult GetLastTransaction()
-        {
-            Logger log = new Logger(this.ShortName, this.deviceID);
-            log.Write("GetLastTransaction()");
-            if (lastTransaction == null)
-                lastTransaction = new TransactionFailedResult(TransactionType.Debit, DateTime.Now);
-            return lastTransaction;
-        }
-
-        public Card GetManualCard(Card card)
-        {
-            return card;
-        }
-
-        public Card GetManualCard(Card card, string paymentType)
-        {
-            return card;
-        }
-        
-
-        public ValidationResult ValidateCard()
-        {
-            Logger log = new Logger(this.ShortName, this.deviceID);
-            log.Write("ValidateCard()");
-            return new ValidationResult();
-        }
-
-        public ValidationResult ValidateCard(Card card)
-        {
-            Logger log = new Logger(this.ShortName, this.deviceID);
-            log.Write($"ValidateCard(card) {card.Number}");
-            return new ValidationResult();
-        }
-
-        public TransactionResult Void(TransactionDoneResult debitResultData)
-        {
-            return new TransactionFailedResult(debitResultData.TransactionType);
-        }
-
-        public void Activate(decimal amount)
-        {
-            Logger log = new Logger(this.ShortName, this.deviceID);
-            //_transactionCancelled = false;
-            _activated = true;
-            log.Write($"Activate({amount} грн)");
-            if (this.deviceType == DeviceType.PaymentCheckpoint)
-            {
-                if (false)
-                {
-                    log.Write(string.Format("Terminal blocked"));
-                    OnAction(new ActionEventArgs("Оплата тимчасово \nне можлива!", ActionType.DisplayCustomerMessage));
-                }
-                else
-                {
-                    OnCardInserted();
-                }
-            }
-        }
-
-        public void Deactivate()
-        {
-            Logger log = new Logger(this.ShortName, this.deviceID);
-            log.Write("Deactivate()");
-            _activated = false;
-            if (this.deviceType == DeviceType.PaymentCheckpoint)
-            {
-                //this.Cancel();
-                log.Write("Deactivate(Cancel)");
-                //_transactionCancelled = true;
-            }
-        }
-
-        public void ReleaseCard()
-        {
-            Logger log = new Logger(this.ShortName, this.deviceID);
-            log.Write("ReleaseCard()");
-            OnCardRemoved();
-            //this._activated = false;
-        }
     }
 }

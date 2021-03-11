@@ -117,17 +117,32 @@ static void SetResponse(string str)
 
 int main()
 {
-    string str = "MessageID=PUR\r\nECRNumber=01\r\nResponseCode=B5\r\n";
-    vector<string> vt = ParseString(str, '\n');
-    
-    for (int i = 0; i < vt.size(); i++)
-    {
-        SetResponse(vt[i]);
-        //std::cout <<i<<" " << vt[i]<<endl;
-    }
-    cout << response.RESPONSECODE<< endl;
+    //string str = "MessageID=PUR\r\nECRNumber=01\r\nResponseCode=B5\r\n";
+    //vector<string> vt = ParseString(str, '\n');
+    //
+    //for (int i = 0; i < vt.size(); i++)
+    //{
+    //    SetResponse(vt[i]);
+    //    //std::cout <<i<<" " << vt[i]<<endl;
+    //}
 
 
+    //cout << response.RESPONSECODE<< endl;
+    string str1 = "00";
+    string str2 = "FF";
+    string str3 = "B5";
+    string str4 = "10";
+    //cout << stoi(str1) << endl;
+    //cout << stoi(str2, 0, 16) << endl;
+    //cout << stoi(str3, 0, 16) << endl;
+    //cout << stoi(str4, 0, 16) << endl;
+
+    int x = 4;
+    int y = 2;
+    int z = x + y;
+    cout << z << endl;
+
+    //cout << str1 << endl;
 }
 
 

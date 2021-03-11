@@ -10,7 +10,7 @@ namespace KZ_Pos_EPI
         string connectionString;
         SqlConnection conn;
         SqlCommand cmd;
-        bool demo = true;
+        bool demo = false;
         public SQLConnect()
         {
 
@@ -35,7 +35,6 @@ namespace KZ_Pos_EPI
                 cmd.Parameters.AddWithValue("@TicketNR", tckNR);
                 cmd.Parameters.AddWithValue("@CardNR", crdNR);
                 cmd.Parameters.AddWithValue("@IsPrinted", 0);
-                cmd.Parameters.AddWithValue("@VisaDiscount", 0);
                 try
                 {
                     SqlDataReader reader = cmd.ExecuteReader();

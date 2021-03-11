@@ -9,9 +9,10 @@
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>KZ_Pos_EPI</RootNamespace>
     <AssemblyName>KZ_Pos_EPI</AssemblyName>
-    <TargetFrameworkVersion>v4.7.2</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v3.5</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <Deterministic>true</Deterministic>
+    <TargetFrameworkProfile />
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
@@ -32,13 +33,13 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="SkiData.ElectronicPaymentInterface, Version=5.4.0.0, Culture=neutral, PublicKeyToken=d49c6c683ad30fe9, processorArchitecture=MSIL">
+    <Reference Include="SkiData.ElectronicPaymentInterface, Version=5.0.0.1, Culture=neutral, PublicKeyToken=d49c6c683ad30fe9, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\..\..\Program Files (x86)\SKIDATA\SKIDATA Electronic Payment SDK V5.4\Lib\SkiData.ElectronicPaymentInterface.dll</HintPath>
+      <HintPath>..\..\..\..\Program Files (x86)\SKIDATA\SKIDATA Electronic Payment SDK V4.1\Lib\SkiData.ElectronicPaymentInterface.dll</HintPath>
     </Reference>
-    <Reference Include="SkiData.Parking.ElectronicPayment.Extensions, Version=24.1.0.1, Culture=neutral, PublicKeyToken=77b7d1dfd1837f64, processorArchitecture=MSIL">
+    <Reference Include="SkiData.Parking.ElectronicPayment.Extensions, Version=24.0.0.4, Culture=neutral, PublicKeyToken=77b7d1dfd1837f64, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\..\..\Program Files (x86)\SKIDATA\SKIDATA Electronic Payment SDK V5.4\Lib\SkiData.Parking.ElectronicPayment.Extensions.dll</HintPath>
+      <HintPath>..\..\..\..\Program Files (x86)\SKIDATA\SKIDATA Electronic Payment SDK V4.1\Lib\SkiData.Parking.ElectronicPayment.Extensions.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
@@ -52,6 +53,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="CountTransaction.cs" />
+    <Compile Include="ECRNumeration.cs" />
     <Compile Include="Logger.cs" />
     <Compile Include="CDPosEPI.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
