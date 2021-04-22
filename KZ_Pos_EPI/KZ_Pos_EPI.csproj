@@ -9,7 +9,7 @@
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>KZ_Pos_EPI</RootNamespace>
     <AssemblyName>KZ_Pos_EPI</AssemblyName>
-    <TargetFrameworkVersion>v3.5</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v4.7.2</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <Deterministic>true</Deterministic>
     <TargetFrameworkProfile />
@@ -23,6 +23,7 @@
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
     <PlatformTarget>x86</PlatformTarget>
+    <Prefer32Bit>false</Prefer32Bit>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugType>pdbonly</DebugType>
@@ -31,24 +32,23 @@
     <DefineConstants>TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
+    <Prefer32Bit>false</Prefer32Bit>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="SkiData.ElectronicPaymentInterface, Version=5.0.0.1, Culture=neutral, PublicKeyToken=d49c6c683ad30fe9, processorArchitecture=MSIL">
+    <Reference Include="SkiData.ElectronicPaymentInterface, Version=5.4.0.0, Culture=neutral, PublicKeyToken=d49c6c683ad30fe9, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\..\..\Program Files (x86)\SKIDATA\SKIDATA Electronic Payment SDK V4.1\Lib\SkiData.ElectronicPaymentInterface.dll</HintPath>
+      <HintPath>..\..\..\..\Program Files (x86)\SKIDATA\SKIDATA Electronic Payment SDK V5.4\Lib\SkiData.ElectronicPaymentInterface.dll</HintPath>
     </Reference>
-    <Reference Include="SkiData.Parking.ElectronicPayment.Extensions, Version=24.0.0.4, Culture=neutral, PublicKeyToken=77b7d1dfd1837f64, processorArchitecture=MSIL">
+    <Reference Include="SkiData.Parking.ElectronicPayment.Extensions, Version=24.1.0.1, Culture=neutral, PublicKeyToken=77b7d1dfd1837f64, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\..\..\Program Files (x86)\SKIDATA\SKIDATA Electronic Payment SDK V4.1\Lib\SkiData.Parking.ElectronicPayment.Extensions.dll</HintPath>
+      <HintPath>..\..\..\..\Program Files (x86)\SKIDATA\SKIDATA Electronic Payment SDK V5.4\Lib\SkiData.Parking.ElectronicPayment.Extensions.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Windows.Forms" />
     <Reference Include="System.Xml.Linq" />
     <Reference Include="System.Data.DataSetExtensions" />
-    <Reference Include="Microsoft.CSharp" />
     <Reference Include="System.Data" />
-    <Reference Include="System.Net.Http" />
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>

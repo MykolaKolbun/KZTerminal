@@ -7,9 +7,9 @@ using KZIngenicoXLib;
 using System.Diagnostics;
 using System.IO;
 using System.Runtime.InteropServices;
+using System.Threading;
 using SkiData.ElectronicPayment;
 using SkiData.Parking.ElectronicPayment.Extensions;
-using System.Threading;
 
 namespace KZ_Pos_EPI
 {
@@ -40,8 +40,8 @@ namespace KZ_Pos_EPI
         #region Constructor
         public CDPosEPI()
         {
-            this._settings.AllowsCancel = true;
-            this._settings.AllowsCredit = true;
+            this._settings.AllowsCancel = false;
+            this._settings.AllowsCredit = false;
             this._settings.AllowsRepeatReceipt = false;
             this._settings.AllowsValidateCard = true;
             this._settings.AllowsVoid = true;
@@ -418,14 +418,14 @@ namespace KZ_Pos_EPI
             Logger log = new Logger(this.ShortName, this.deviceID);
             //_transactionCancelled = false;
             _activated = true;
-            log.Write($"Activate ({amount} грн)");
+            log.Write($"Activate ({amount} кзт)");
             //if (amount != 0)
             //{
             //    OnCardInserted();
             //}
         }
 
-public void Deactivate()
+        public void Deactivate()
         {
             Logger log = new Logger(this.ShortName, this.deviceID);
             log.Write("Deactivate()");
