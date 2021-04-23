@@ -98,6 +98,10 @@ EXTERN_C const IID IID_IPos;
             /* [in] */ BSTR ECRNr,
             /* [in] */ BSTR TRNr,
             /* [retval][out] */ BYTE *result) = 0;
+        virtual /* [id] */ HRESULT STDMETHODCALLTYPE StartSettlement(
+            /* [in] */ BSTR ECRNr,
+            /* [in] */ BSTR TRNr,
+            /* [retval][out] */ BYTE* result) = 0;
         
         virtual /* [id] */ HRESULT STDMETHODCALLTYPE GetResponce( void) = 0;
         

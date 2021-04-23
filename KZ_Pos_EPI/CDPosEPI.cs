@@ -13,7 +13,7 @@ using SkiData.Parking.ElectronicPayment.Extensions;
 
 namespace KZ_Pos_EPI
 {
-    public class CDPosEPI : ITerminal2, ICardHandling2
+    public class CDPosEPI : ITerminal2, ICardHandling2, ISettlement
     {
         #region Fields
         private Settings _settings = new Settings();
@@ -107,6 +107,8 @@ namespace KZ_Pos_EPI
         }
 
         public string ShortName => "KZ_Terminal";
+
+        
 
         public bool BeginInstall(TerminalConfiguration configuration)
         {
@@ -438,6 +440,15 @@ namespace KZ_Pos_EPI
             log.Write("ReleaseCard()");
             OnCardRemoved();
             _activated = false;
+        }
+        #endregion
+
+        #region ISettlement
+        public SettlementSettings Settings => throw new NotImplementedException();
+
+        public SettlementResult Settlement(SettlementInput settlementData)
+        {
+            throw new NotImplementedException();
         }
         #endregion
 

@@ -143,12 +143,12 @@ END_COM_MAP()
 	
 	static HINSTANCE Connect(LPCWSTR dllPath, string setupPath);
 	static void Purchase(HINSTANCE instance, string ECRNumber, string transactionNumber, int amount);
+	static void Settlement(HINSTANCE instance, string ECRNumber, string transactionNumber);
 public:
 	
-	/*STDMETHOD(Add)(DOUBLE a, DOUBLE b, DOUBLE * res);
-	STDMETHOD(Connect1)(BYTE* result);*/
 	STDMETHOD(Initialize)(BSTR dllPath, BSTR setupPath, BYTE* result);
 	STDMETHOD(StartPurchase)(DOUBLE amount, BSTR ECRNr, BSTR TRNr, byte* result);
+	STDMETHOD(StartSettlement)(BSTR ECRNr, BSTR TRNr, byte* result);
 	STDMETHOD(GetResponce)();
 	STDMETHOD(get_lastError)(LONG* pVal);
 	STDMETHOD(get_LastErrorDescription)(BSTR* pVal);
@@ -165,6 +165,7 @@ public:
 	STDMETHOD(get_Amount)(LONG* pVal);
 	
 	STDMETHOD(get_outString)(BSTR* pVal);
+	
 };
 
 OBJECT_ENTRY_AUTO(__uuidof(Pos), CPos)

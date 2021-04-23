@@ -28,7 +28,6 @@ static int _ScreenShow(ScreenParams* pScreenParams)
 
 static void _ScreenClose()
 {
-    //ScreenClose();
 }
 
 static void SetDefaults()
@@ -214,6 +213,52 @@ void CPos::Purchase(HINSTANCE instance, string ECRNumber, string transactionNumb
 
 }
 
+void CPos::Settlement(HINSTANCE instance, string ECRNumber, string transactionNumber)
+{
+    SetDefaults();
+    string inParamsStr;
+    char outParamsCh[1000];
+    char receiptCh[2000];
+    string _1 = "MessageID=PUR";
+    string _2 = "\nECRnumber=";
+    string _3 = ECRNumber;
+    string _4 = "\nECRReceiptNumber=";
+    string _5 = transactionNumber;
+    string _8 = "\n";
+    inParamsStr = _1 + _2 + _3 + _4 + _5 + _8;
+    int lenOut, lenReceipt = 0;
+    int* _lenOut = &lenOut;
+    int* _lenReceipt = &lenReceipt;
+    Proc TRPOSX_Proc = (Proc)GetProcAddress(instance, "TRPOSX_Proc");
+    _LastError = 2;
+    int internalError = TRPOSX_Proc(inParamsStr.c_str(), _lenOut, _lenReceipt);
+    int tempLen = 0;
+    string tempStrinArray[40];
+    if (internalError == 0)
+    {
+        if (_lenOut > 0)
+        {
+            GetRsp TRPOSX_GetResp = (GetRsp)GetProcAddress(instance, "TRPOSX_GetRsp");
+            internalError = TRPOSX_GetResp(outParamsCh, receiptCh);
+            if (internalError == 0)
+            {
+                outStr = string(outParamsCh, lenOut);
+                receipt = string(receiptCh, lenReceipt);
+                vector<string> vt = ParseString(outStr, '\n');
+                copy(vt.begin(), vt.end(), tempStrinArray);
+                for (int j = 0; j < vt.size() - 1; j++)
+                {
+                    SetResponse(vt[j]);
+                }
+                _LastError = 0;
+            }
+        }
+    }
+    else
+    {
+        _LastError = internalError;
+    }
+}
 
 STDMETHODIMP CPos::Initialize(BSTR dllPath, BSTR setupPath, BYTE* result)
 {
@@ -238,6 +283,15 @@ STDMETHODIMP CPos::StartPurchase(DOUBLE amount, BSTR ECRNr, BSTR TRNr, byte *res
     _LastStatMsgCode = 0;
     _LastError = 2;
     std::thread thr(Purchase, posTerminal, bstr_to_str(ECRNr), bstr_to_str(TRNr), (int)amount);
+    thr.detach();
+    return S_OK;
+}
+
+STDMETHODIMP CPos::StartSettlement(BSTR ECRNr, BSTR TRNr, byte* result)
+{
+    _LastStatMsgCode = 0;
+    _LastError = 2;
+    std::thread thr(Settlement, posTerminal, bstr_to_str(ECRNr), bstr_to_str(TRNr));
     thr.detach();
     return S_OK;
 }
@@ -333,3 +387,6 @@ STDMETHODIMP CPos::get_outString(BSTR* pVal)
     *pVal = str_to_bstr(outStr);
     return S_OK;
 }
+
+
+
